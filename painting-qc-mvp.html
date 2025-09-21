@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic QC System - Commercial Painting MVP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .animate-slide-in { animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .workflow-line {
+            background: linear-gradient(90deg, #4f46e5, #06b6d4, #10b981);
+            height: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="qcSystem()">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-paint-brush text-2xl"></i>
+                    <h1 class="text-2xl font-bold">Dynamic QC System</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <button @click="activeView = 'overview'"
+                            :class="activeView === 'overview' ? 'text-yellow-300' : 'text-white hover:text-yellow-200'"
+                            class="transition-colors">Overview</button>
+                    <button @click="activeView = 'mobile'"
+                            :class="activeView === 'mobile' ? 'text-yellow-300' : 'text-white hover:text-yellow-200'"
+                            class="transition-colors">Mobile Checklist</button>
+                    <button @click="activeView = 'dashboard'"
+                            :class="activeView === 'dashboard' ? 'text-yellow-300' : 'text-white hover:text-yellow-200'"
+                            class="transition-colors">Management Dashboard</button>
+                    <button @click="activeView = 'workflow'"
+                            :class="activeView === 'workflow' ? 'text-yellow-300' : 'text-white hover:text-yellow-200'"
+                            class="transition-colors">Workflow</button>
+                </nav>
+                <div class="flex items-center space-x-2">
+                    <div class="relative">
+                        <i class="fas fa-bell text-xl cursor-pointer" @click="showNotifications = !showNotifications"></i>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center" x-text="notifications.length"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notifications Panel -->
+    <div x-show="showNotifications" x-transition class="fixed top-16 right-4 bg-white rounded-lg shadow-xl p-4 w-80 z-50">
+        <h3 class="font-bold text-gray-800 mb-3">Recent Notifications</h3>
+        <template x-for="notification in notifications">
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded">
+                <i class="fas fa-exclamation-circle text-orange-500 mt-1"></i>
+                <div>
+                    <p class="text-sm font-medium" x-text="notification.title"></p>
+                    <p class="text-xs text-gray-500" x-text="notification.time"></p>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Overview Section -->
+        <div x-show="activeView === 'overview'" class="animate-fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">End-to-End Quality Control System</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Streamline your painting projects with mobile-friendly checklists, automated photo management, and real-time progress tracking.</p>
+            </div>
+
+            <!-- Key Features Grid -->
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Mobile-First Checklist</h3>
+                    <p class="text-gray-600">Easy-to-use forms optimized for smartphones and tablets. Complete inspections on-site with offline capability.</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-camera text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Auto Photo Management</h3>
+                    <p class="text-gray-600">Automatic organization of photos by job number and stage. Wide shots and detail shots properly categorized.</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Real-time Dashboard</h3>
+                    <p class="text-gray-600">Live updates for management with filtering options: Ready to Bill, Pending Review, Completed.</p>
+                </div>
+            </div>
+
+            <!-- System Architecture -->
+            <div class="bg-white rounded-xl p-8 card-shadow">
+                <h3 class="text-2xl font-bold text-center mb-8">System Architecture</h3>
+                <div class="flex flex-wrap justify-center items-center space-x-8 space-y-4">
+                    <div class="flex flex-col items-center">
+                        <div class="bg-blue-500 text-white p-4 rounded-full mb-2">
+                            <i class="fab fa-google text-2xl"></i>
+                        </div>
+                        <span class="font-semibold">Google Forms</span>
+                        <span class="text-sm text-gray-500">Data Collection</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-gray-400 text-xl"></i>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-green-500 text-white p-4 rounded-full mb-2">
+                            <i class="fas fa-table text-2xl"></i>
+                        </div>
+                        <span class="font-semibold">Google Sheets</span>
+                        <span class="text-sm text-gray-500">Central Database</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-gray-400 text-xl"></i>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-yellow-500 text-white p-4 rounded-full mb-2">
+                            <i class="fab fa-google-drive text-2xl"></i>
+                        </div>
+                        <span class="font-semibold">Google Drive</span>
+                        <span class="text-sm text-gray-500">Photo Storage</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-gray-400 text-xl"></i>
+                    <div class="flex flex-col items-center">
+                        <div class="bg-purple-500 text-white p-4 rounded-full mb-2">
+                            <i class="fas fa-cogs text-2xl"></i>
+                        </div>
+                        <span class="font-semibold">Apps Script</span>
+                        <span class="text-sm text-gray-500">Automation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Checklist Section -->
+        <div x-show="activeView === 'mobile'" class="animate-fade-in">
+            <div class="max-w-md mx-auto">
+                <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                    <!-- Mobile Header -->
+                    <div class="gradient-bg text-white p-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-paint-brush text-xl"></i>
+                            <div>
+                                <h3 class="font-bold">Quality Control Checklist</h3>
+                                <p class="text-sm opacity-90">Job #12345 - Midpoint Inspection</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Content -->
+                    <div class="p-6 space-y-6">
+                        <!-- Job Info -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="font-semibold mb-2">Job Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Client:</span>
+                                    <span class="font-medium">ABC Corporation</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Location:</span>
+                                    <span class="font-medium">Building A, Floor 3</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Lead Painter:</span>
+                                    <span class="font-medium">Mike Rodriguez</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inspection Stage -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Inspection Stage</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option>50% Midpoint</option>
+                                <option>100% Final</option>
+                            </select>
+                        </div>
+
+                        <!-- Checklist Items -->
+                        <div>
+                            <h4 class="font-semibold mb-3">Quality Checklist</h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <span>Surface preparation completed properly</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <span>Primer applied evenly</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                                    <span>First coat applied without defects</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                                    <span>Cleanup completed per standards</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Photo Upload -->
+                        <div>
+                            <h4 class="font-semibold mb-3">Required Photos</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-600">Wide Shot</p>
+                                    <button class="mt-2 text-blue-600 text-sm">Upload Photo</button>
+                                </div>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                    <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-600">Detail Shot</p>
+                                    <button class="mt-2 text-blue-600 text-sm">Upload Photo</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Exceptions -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Exceptions/Issues</label>
+                            <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Describe any issues or exceptions..."></textarea>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Job Status</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option>In Progress</option>
+                                <option>Billing Ready</option>
+                                <option>Needs Review</option>
+                                <option>Exception</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                            Submit Inspection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Dashboard -->
+        <div x-show="activeView === 'dashboard'" class="animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Management Dashboard</h2>
+                <p class="text-gray-600">Real-time overview of all quality control inspections and job status.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Active Jobs</p>
+                            <p class="text-2xl font-bold text-blue-600">24</p>
+                        </div>
+                        <i class="fas fa-briefcase text-2xl text-blue-400"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Billing Ready</p>
+                            <p class="text-2xl font-bold text-green-600">8</p>
+                        </div>
+                        <i class="fas fa-check-circle text-2xl text-green-400"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Pending Review</p>
+                            <p class="text-2xl font-bold text-orange-600">5</p>
+                        </div>
+                        <i class="fas fa-clock text-2xl text-orange-400"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Exceptions</p>
+                            <p class="text-2xl font-bold text-red-600">2</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                <div class="grid md:grid-cols-4 gap-4">
+                    <select class="p-3 border border-gray-300 rounded-lg">
+                        <option>All Statuses</option>
+                        <option>Billing Ready</option>
+                        <option>Pending Review</option>
+                        <option>In Progress</option>
+                        <option>Exception</option>
+                    </select>
+                    <select class="p-3 border border-gray-300 rounded-lg">
+                        <option>All Painters</option>
+                        <option>Mike Rodriguez</option>
+                        <option>Sarah Johnson</option>
+                        <option>David Chen</option>
+                    </select>
+                    <input type="date" class="p-3 border border-gray-300 rounded-lg">
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-filter mr-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Jobs Table -->
+            <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job #</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead Painter</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stage</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Update</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12345</td>
+                                <td class="px-6 py-4 whitespace-nowrap">ABC Corporation</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Mike Rodriguez</td>
+                                <td class="px-6 py-4 whitespace-nowrap">50%</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Billing Ready</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 hours ago</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="text-green-600 hover:text-green-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12346</td>
+                                <td class="px-6 py-4 whitespace-nowrap">XYZ Industries</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Sarah Johnson</td>
+                                <td class="px-6 py-4 whitespace-nowrap">100%</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Pending Review</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 hours ago</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="text-green-600 hover:text-green-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12347</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Tech Solutions Ltd</td>
+                                <td class="px-6 py-4 whitespace-nowrap">David Chen</td>
+                                <td class="px-6 py-4 whitespace-nowrap">50%</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Exception</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 day ago</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Section -->
+        <div x-show="activeView === 'workflow'" class="animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">System Workflow</h2>
+                <p class="text-gray-600">End-to-end process from field inspection to management review.</p>
+            </div>
+
+            <!-- Workflow Diagram -->
+            <div class="bg-white rounded-xl p-8 card-shadow mb-8">
+                <div class="space-y-8">
+                    <!-- Step 1 -->
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">Field Inspection</h3>
+                            <p class="text-gray-600">Lead painter completes mobile checklist on-site at 50% or 100% stage</p>
+                            <div class="mt-2 flex space-x-4 text-sm">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Google Forms</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Mobile Optimized</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-2xl text-blue-500"></i>
+                        </div>
+                    </div>
+
+                    <div class="ml-6 workflow-line"></div>
+
+                    <!-- Step 2 -->
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">Photo Upload & Organization</h3>
+                            <p class="text-gray-600">Wide and detail photos automatically organized into Google Drive folders by Job # and stage</p>
+                            <div class="mt-2 flex space-x-4 text-sm">
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Google Drive</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">Auto Organization</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-camera text-2xl text-green-500"></i>
+                        </div>
+                    </div>
+
+                    <div class="ml-6 workflow-line"></div>
+
+                    <!-- Step 3 -->
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">Data Processing</h3>
+                            <p class="text-gray-600">Apps Script processes submission, updates central log, prevents duplicates</p>
+                            <div class="mt-2 flex space-x-4 text-sm">
+                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">Google Sheets</span>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Apps Script</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-cogs text-2xl text-purple-500"></i>
+                        </div>
+                    </div>
+
+                    <div class="ml-6 workflow-line"></div>
+
+                    <!-- Step 4 -->
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">Notifications & Alerts</h3>
+                            <p class="text-gray-600">Automatic notifications sent for billing ready jobs and flagged exceptions</p>
+                            <div class="mt-2 flex space-x-4 text-sm">
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Email Alerts</span>
+                                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded">Real-time</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-bell text-2xl text-orange-500"></i>
+                        </div>
+                    </div>
+
+                    <div class="ml-6 workflow-line"></div>
+
+                    <!-- Step 5 -->
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold">5</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold">Management Review</h3>
+                            <p class="text-gray-600">Clean dashboard view for Wednesday meetings with filterable status options</p>
+                            <div class="mt-2 flex space-x-4 text-sm">
+                                <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">Dashboard</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Filterable</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-chart-line text-2xl text-indigo-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Drive Structure -->
+            <div class="bg-white rounded-xl p-8 card-shadow">
+                <h3 class="text-xl font-bold mb-6">Google Drive Organization</h3>
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="font-mono text-sm space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-folder text-yellow-500"></i>
+                            <span class="font-semibold">QC Photos/</span>
+                        </div>
+                        <div class="ml-6 space-y-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-folder text-blue-500"></i>
+                                <span>Job-12345/</span>
+                            </div>
+                            <div class="ml-6 space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-folder text-green-500"></i>
+                                    <span>50-Percent/</span>
+                                </div>
+                                <div class="ml-6 space-y-1">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-image text-gray-500"></i>
+                                        <span>wide-shot-1.jpg</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-image text-gray-500"></i>
+                                        <span>detail-shot-1.jpg</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-folder text-green-500"></i>
+                                    <span>100-Percent/</span>
+                                </div>
+                                <div class="ml-6 space-y-1">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-image text-gray-500"></i>
+                                        <span>wide-shot-final.jpg</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-image text-gray-500"></i>
+                                        <span>detail-shot-final.jpg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">Ready to Streamline Your QC Process?</h3>
+            <p class="text-lg mb-6">Let's build this system together and transform your quality control workflow.</p>
+            <div class="space-x-4">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Mobile-First Design</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Google Suite Integration</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Real-time Updates</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function qcSystem() {
+            return {
+                activeView: 'overview',
+                showNotifications: false,
+                notifications: [
+                    { title: 'Job #12345 marked as Billing Ready', time: '2 hours ago' },
+                    { title: 'Exception flagged on Job #12347', time: '1 day ago' },
+                    { title: 'New inspection submitted by Mike Rodriguez', time: '3 hours ago' }
+                ]
+            }
+        }
+    </script>
+</body>
+</html>

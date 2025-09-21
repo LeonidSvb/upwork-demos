@@ -1,0 +1,48 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Task",
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "WebFetch",
+      "Grep",
+      "Glob",
+      "LS",
+      "MultiEdit",
+      "NotebookRead",
+      "NotebookEdit",
+      "TodoRead",
+      "TodoWrite",
+      "WebSearch",
+      "ExitPlanMode",
+      "BashOutput",
+      "KillBash",
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "mcp__gdrive__gdrive_search",
+      "mcp__gdrive__gdrive_read_file",
+      "mcp__gdrive__gsheets_update_cell",
+      "mcp__gdrive__gsheets_read",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)",
+      "Bash(dir)",
+      "Bash(mkdir:*)",
+      "Bash(move browser-screenshot-orchestrator-sub-agent.md browser-screenshot-orchestrator-sub-agentagent.md)",
+      "Bash(move browser-screenshot-orchestrator-sub-agent.log browser-screenshot-orchestrator-sub-agentagent.log)",
+      "Bash(move browser-screenshot-orchestrator-sub-agent.improvements browser-screenshot-orchestrator-sub-agentagent.improvements)",
+      "Bash(mv:*)",
+      "Bash(rmdir:*)",
+      "mcp__firecrawl-mcp__firecrawl_search"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\Users\\79818\\Desktop\\MCP Global\\mcp-servers\\n8n-mcp\\_technical"
+    ]
+  }
+}
