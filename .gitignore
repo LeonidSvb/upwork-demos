@@ -1,0 +1,6 @@
+# Игнорировать все файлы кроме папки demo
+*
+!demo/
+!demo/**
+!.gitignore
+!README.md
