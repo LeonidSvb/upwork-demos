@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe + Jotform Integration - Technical Architecture Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-okaidia.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%); }
+        .tech-card { transition: all 0.3s ease; }
+        .tech-card:hover { transform: translateY(-5px); }
+        .api-flow { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4, #10b981); height: 3px; }
+        .code-block { background: #282c34; }
+        .animate-pulse-slow { animation: pulse 3s infinite; }
+        .workflow-step { transition: all 0.5s ease; }
+        .workflow-step.active { background: #eff6ff; border-color: #3b82f6; }
+        .data-flow {
+            stroke-dasharray: 20;
+            animation: dash 2s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -40; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans" x-data="integrationDemo()">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-lg">
+                        <i class="fas fa-code text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold">Chicago St. Patrick's Day Parade</h1>
+                        <p class="text-blue-100">Stripe + Jotform Integration Architecture</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-blue-100">Project Budget</p>
+                        <p class="text-xl font-bold">$1,000 Fixed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-8">
+                <button @click="activeTab = 'architecture'"
+                        :class="activeTab === 'architecture' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-sitemap mr-2"></i>Architecture
+                </button>
+                <button @click="activeTab = 'workflow'"
+                        :class="activeTab === 'workflow' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-project-diagram mr-2"></i>Data Flow
+                </button>
+                <button @click="activeTab = 'apis'"
+                        :class="activeTab === 'apis' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-code mr-2"></i>API Integration
+                </button>
+                <button @click="activeTab = 'implementation'"
+                        :class="activeTab === 'implementation' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-tasks mr-2"></i>Implementation
+                </button>
+                <button @click="activeTab = 'testing'"
+                        :class="activeTab === 'testing' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-bug mr-2"></i>Testing & QA
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Architecture Tab -->
+        <div x-show="activeTab === 'architecture'" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">System Architecture</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Complete integration architecture for automated registration, payment processing, and data synchronization.</p>
+            </div>
+
+            <!-- Technology Stack -->
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="tech-card bg-white rounded-xl p-6 shadow-lg text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-wpforms text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Jotform</h3>
+                    <p class="text-sm text-gray-600 mb-3">Registration intake with conditional logic</p>
+                    <div class="space-y-1 text-xs">
+                        <span class="block bg-blue-50 text-blue-700 px-2 py-1 rounded">Webhooks API</span>
+                        <span class="block bg-blue-50 text-blue-700 px-2 py-1 rounded">Conditional Fields</span>
+                    </div>
+                </div>
+
+                <div class="tech-card bg-white rounded-xl p-6 shadow-lg text-center">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-stripe-s text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Stripe</h3>
+                    <p class="text-sm text-gray-600 mb-3">Payment processing & invoice generation</p>
+                    <div class="space-y-1 text-xs">
+                        <span class="block bg-purple-50 text-purple-700 px-2 py-1 rounded">Checkout API</span>
+                        <span class="block bg-purple-50 text-purple-700 px-2 py-1 rounded">Invoice API</span>
+                    </div>
+                </div>
+
+                <div class="tech-card bg-white rounded-xl p-6 shadow-lg text-center">
+                    <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-table text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Airtable</h3>
+                    <p class="text-sm text-gray-600 mb-3">Data storage & management dashboard</p>
+                    <div class="space-y-1 text-xs">
+                        <span class="block bg-orange-50 text-orange-700 px-2 py-1 rounded">REST API</span>
+                        <span class="block bg-orange-50 text-orange-700 px-2 py-1 rounded">Linked Records</span>
+                    </div>
+                </div>
+
+                <div class="tech-card bg-white rounded-xl p-6 shadow-lg text-center">
+                    <div class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-2xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Mailchimp</h3>
+                    <p class="text-sm text-gray-600 mb-3">Automated emails & reminders</p>
+                    <div class="space-y-1 text-xs">
+                        <span class="block bg-yellow-50 text-yellow-700 px-2 py-1 rounded">Transactional API</span>
+                        <span class="block bg-yellow-50 text-yellow-700 px-2 py-1 rounded">Automation</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Overview -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6 text-center">Integration Flow</h3>
+                <div class="grid md:grid-cols-5 gap-4 items-center">
+                    <div class="text-center">
+                        <div class="bg-blue-500 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                            <span class="font-bold">1</span>
+                        </div>
+                        <h4 class="font-semibold">Form Submission</h4>
+                        <p class="text-sm text-gray-600">User completes Jotform</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="api-flow"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-purple-500 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                            <span class="font-bold">2</span>
+                        </div>
+                        <h4 class="font-semibold">Payment Processing</h4>
+                        <p class="text-sm text-gray-600">Stripe invoice/checkout</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="api-flow"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-orange-500 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                            <span class="font-bold">3</span>
+                        </div>
+                        <h4 class="font-semibold">Data Sync</h4>
+                        <p class="text-sm text-gray-600">Airtable update</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-shield-alt text-green-500 mr-3"></i>
+                        Payment Security
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> PCI DSS compliant Stripe integration</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Secure webhook validation</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Payment method verification</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Fraud detection integration</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-sync text-blue-500 mr-3"></i>
+                        Real-time Sync
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i> Instant Airtable updates</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i> Webhook-based automation</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i> Error handling & retry logic</li>
+                        <li class="flex items-center"><i class="fas fa-check text-blue-500 mr-2"></i> Data validation & cleanup</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Tab -->
+        <div x-show="activeTab === 'workflow'" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Data Flow & Workflow</h2>
+                <p class="text-lg text-gray-600">Step-by-step process from user registration to automated follow-ups</p>
+            </div>
+
+            <!-- Interactive Workflow -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <div class="flex justify-center mb-8">
+                    <button @click="startWorkflowDemo()"
+                            class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-play mr-2"></i>Start Workflow Demo
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Step 1: Jotform -->
+                    <div class="workflow-step border-2 border-gray-200 rounded-lg p-6"
+                         :class="currentStep >= 1 ? 'active' : ''">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">Jotform Registration</h3>
+                                <p class="text-gray-600 mb-3">User selects sponsorship tiers, add-ons, and payment method</p>
+                                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <strong>Sponsorship Tiers:</strong><br>
+                                        Gold, Silver, Bronze levels
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <strong>Add-ons:</strong><br>
+                                        Tables, seats, merchandise
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <strong>Payment:</strong><br>
+                                        Card or check options
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Processing -->
+                    <div class="workflow-step border-2 border-gray-200 rounded-lg p-6"
+                         :class="currentStep >= 2 ? 'active' : ''">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">Cart Processing & Invoice Generation</h3>
+                                <p class="text-gray-600 mb-3">System calculates totals and creates Stripe invoice/session</p>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <pre class="text-sm"><code>// Invisible cart calculation
+const cartTotal = selectedTiers.reduce((sum, tier) =>
+  sum + tier.price, 0) + addOns.reduce((sum, addon) =>
+  sum + addon.price, 0);</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Stripe -->
+                    <div class="workflow-step border-2 border-gray-200 rounded-lg p-6"
+                         :class="currentStep >= 3 ? 'active' : ''">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">Stripe Payment Processing</h3>
+                                <p class="text-gray-600 mb-3">Different flows for card vs check payments</p>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="bg-green-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-green-800 mb-2">Card Payment</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>→ Stripe Checkout session</li>
+                                            <li>→ Real-time payment</li>
+                                            <li>→ Instant confirmation</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-yellow-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-yellow-800 mb-2">Check Payment</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>→ Invoice generation</li>
+                                            <li>→ Payment instructions</li>
+                                            <li>→ Manual reconciliation</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Airtable -->
+                    <div class="workflow-step border-2 border-gray-200 rounded-lg p-6"
+                         :class="currentStep >= 4 ? 'active' : ''">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">Airtable Data Sync</h3>
+                                <p class="text-gray-600 mb-3">All submission data pushed to structured Airtable base</p>
+                                <div class="bg-orange-50 p-4 rounded-lg">
+                                    <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <strong>Participants Table:</strong><br>
+                                            Contact info, organization details
+                                        </div>
+                                        <div>
+                                            <strong>Payments Table:</strong><br>
+                                            Transaction IDs, amounts, status
+                                        </div>
+                                        <div>
+                                            <strong>Perks Table:</strong><br>
+                                            Sponsorship benefits, fulfillment
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Automation -->
+                    <div class="workflow-step border-2 border-gray-200 rounded-lg p-6"
+                         :class="currentStep >= 5 ? 'active' : ''">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center font-bold">5</div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">Email Automation</h3>
+                                <p class="text-gray-600 mb-3">Mailchimp triggers based on payment status and time delays</p>
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3 text-sm">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span>Immediate confirmation receipt</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3 text-sm">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                        <span>Check payment instructions (if applicable)</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3 text-sm">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                        <span>Payment reminders after X days</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3 text-sm">
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                        <span>Asset collection & perk fulfillment</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Structure -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">Airtable Data Structure</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 text-blue-600">Participants</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>• Organization Name</li>
+                            <li>• Contact Information</li>
+                            <li>• Registration Date</li>
+                            <li>• Payment Method</li>
+                            <li>• Total Amount</li>
+                        </ul>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 text-purple-600">Payments</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>• Stripe Transaction ID</li>
+                            <li>• Payment Status</li>
+                            <li>• Amount & Currency</li>
+                            <li>• Payment Date</li>
+                            <li>• Linked Participant</li>
+                        </ul>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-bold text-lg mb-3 text-green-600">Perks & Benefits</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>• Sponsorship Level</li>
+                            <li>• Logo Placement</li>
+                            <li>• Table/Seat Allocation</li>
+                            <li>• Merchandise Items</li>
+                            <li>• Fulfillment Status</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Integration Tab -->
+        <div x-show="activeTab === 'apis'" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">API Integration Examples</h2>
+                <p class="text-lg text-gray-600">Real code examples for each integration point</p>
+            </div>
+
+            <!-- Jotform Webhook Handler -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fab fa-wpforms text-blue-500 mr-3"></i>
+                    Jotform Webhook Handler
+                </h3>
+                <div class="code-block rounded-lg p-4 overflow-x-auto">
+                    <pre><code class="language-javascript">// Jotform webhook endpoint
+app.post('/webhook/jotform', async (req, res) => {
+  try {
+    const submission = req.body;
+
+    // Extract form data
+    const formData = {
+      organizationName: submission.q3_organizationName,
+      contactEmail: submission.q5_email,
+      sponsorshipTier: submission.q8_sponsorshipTier,
+      addOns: submission.q12_addOns || [],
+      paymentMethod: submission.q15_paymentMethod,
+      totalAmount: calculateTotal(submission)
+    };
+
+    // Create Stripe session/invoice
+    const stripeResult = await createStripePayment(formData);
+
+    // Sync to Airtable
+    await syncToAirtable(formData, stripeResult);
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Webhook error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});</code></pre>
+                </div>
+            </div>
+
+            <!-- Stripe Integration -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fab fa-stripe-s text-purple-500 mr-3"></i>
+                    Stripe Payment Processing
+                </h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3">Card Payment Session</h4>
+                        <div class="code-block rounded-lg p-4 overflow-x-auto">
+                            <pre><code class="language-javascript">const createCheckoutSession = async (formData) => {
+  const lineItems = [];
+
+  // Add sponsorship tier
+  if (formData.sponsorshipTier) {
+    lineItems.push({
+      price: getStripePriceId(formData.sponsorshipTier),
+      quantity: 1,
+    });
+  }
+
+  // Add add-ons
+  formData.addOns.forEach(addon => {
+    lineItems.push({
+      price: getStripePriceId(addon),
+      quantity: addon.quantity || 1,
+    });
+  });
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: lineItems,
+    mode: 'payment',
+    success_url: `${process.env.DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.DOMAIN}/cancel`,
+    metadata: {
+      jotform_submission_id: formData.submissionId,
+      organization_name: formData.organizationName,
+    },
+  });
+
+  return session;
+};</code></pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3">Check Payment Invoice</h4>
+                        <div class="code-block rounded-lg p-4 overflow-x-auto">
+                            <pre><code class="language-javascript">const createInvoice = async (formData) => {
+  const customer = await stripe.customers.create({
+    name: formData.organizationName,
+    email: formData.contactEmail,
+  });
+
+  const invoice = await stripe.invoices.create({
+    customer: customer.id,
+    collection_method: 'send_invoice',
+    days_until_due: 30,
+    metadata: {
+      payment_method: 'check',
+      jotform_submission_id: formData.submissionId,
+    },
+  });
+
+  // Add line items
+  await addInvoiceItems(invoice.id, formData);
+
+  // Finalize and send
+  const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+  await stripe.invoices.sendInvoice(invoice.id);
+
+  return finalizedInvoice;
+};</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Airtable Sync -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-table text-orange-500 mr-3"></i>
+                    Airtable Data Synchronization
+                </h3>
+                <div class="code-block rounded-lg p-4 overflow-x-auto">
+                    <pre><code class="language-javascript">const syncToAirtable = async (formData, stripeResult) => {
+  const airtable = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY });
+  const base = airtable.base(process.env.AIRTABLE_BASE_ID);
+
+  // Create participant record
+  const participantRecord = await base('Participants').create({
+    'Organization Name': formData.organizationName,
+    'Contact Email': formData.contactEmail,
+    'Registration Date': new Date().toISOString(),
+    'Payment Method': formData.paymentMethod,
+    'Total Amount': formData.totalAmount,
+    'Stripe Customer ID': stripeResult.customer_id,
+  });
+
+  // Create payment record
+  const paymentRecord = await base('Payments').create({
+    'Participant': [participantRecord.id],
+    'Stripe Transaction ID': stripeResult.payment_intent_id || stripeResult.invoice_id,
+    'Amount': formData.totalAmount,
+    'Status': formData.paymentMethod === 'card' ? 'Paid' : 'Pending',
+    'Payment Date': new Date().toISOString(),
+  });
+
+  // Create perk records
+  const perkPromises = formData.addOns.map(addon =>
+    base('Perks').create({
+      'Participant': [participantRecord.id],
+      'Perk Type': addon.type,
+      'Quantity': addon.quantity,
+      'Fulfillment Status': 'Pending',
+    })
+  );
+
+  await Promise.all(perkPromises);
+
+  return { participantRecord, paymentRecord };
+};</code></pre>
+                </div>
+            </div>
+
+            <!-- Mailchimp Automation -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-envelope text-yellow-500 mr-3"></i>
+                    Mailchimp Email Automation
+                </h3>
+                <div class="code-block rounded-lg p-4 overflow-x-auto">
+                    <pre><code class="language-javascript">const triggerEmailAutomation = async (participantData, paymentStatus) => {
+  const mailchimp = require('@mailchimp/mailchimp_transactional')(process.env.MAILCHIMP_API_KEY);
+
+  // Immediate confirmation email
+  const confirmationTemplate = paymentStatus === 'paid'
+    ? 'registration-confirmation-paid'
+    : 'registration-confirmation-pending';
+
+  await mailchimp.messages.sendTemplate({
+    template_name: confirmationTemplate,
+    template_content: [],
+    message: {
+      to: [{
+        email: participantData.contactEmail,
+        name: participantData.organizationName,
+      }],
+      merge_vars: [{
+        rcpt: participantData.contactEmail,
+        vars: [
+          { name: 'ORGANIZATION_NAME', content: participantData.organizationName },
+          { name: 'TOTAL_AMOUNT', content: participantData.totalAmount },
+          { name: 'PAYMENT_STATUS', content: paymentStatus },
+        ],
+      }],
+    },
+  });
+
+  // Schedule reminder emails for check payments
+  if (paymentStatus === 'pending') {
+    await schedulePaymentReminders(participantData);
+  }
+};</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Tab -->
+        <div x-show="activeTab === 'implementation'" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Implementation Plan</h2>
+                <p class="text-lg text-gray-600">Detailed timeline and deliverables for project completion</p>
+            </div>
+
+            <!-- Project Timeline -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">Project Timeline - 10 Days</h3>
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4 pb-6 border-b border-gray-200">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">1-2</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-blue-600">Setup & Configuration (Days 1-2)</h4>
+                            <ul class="mt-2 space-y-1 text-gray-700">
+                                <li>• Stripe product catalog setup with all tiers and add-ons</li>
+                                <li>• Jotform conditional logic implementation</li>
+                                <li>• Airtable base structure review and optimization</li>
+                                <li>• Development environment setup</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 pb-6 border-b border-gray-200">
+                        <div class="flex-shrink-0 w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">3-5</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-purple-600">Core Integration (Days 3-5)</h4>
+                            <ul class="mt-2 space-y-1 text-gray-700">
+                                <li>• Jotform webhook handler development</li>
+                                <li>• Stripe payment processing (both card and invoice)</li>
+                                <li>• Airtable API integration and data sync</li>
+                                <li>• Error handling and retry logic</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 pb-6 border-b border-gray-200">
+                        <div class="flex-shrink-0 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">6-7</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-green-600">Email Automation (Days 6-7)</h4>
+                            <ul class="mt-2 space-y-1 text-gray-700">
+                                <li>• Mailchimp template setup and customization</li>
+                                <li>• Automated email triggers based on payment status</li>
+                                <li>• Reminder sequences for pending payments</li>
+                                <li>• Asset collection workflow emails</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 pb-6 border-b border-gray-200">
+                        <div class="flex-shrink-0 w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">8-9</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-orange-600">Testing & QA (Days 8-9)</h4>
+                            <ul class="mt-2 space-y-1 text-gray-700">
+                                <li>• End-to-end workflow testing</li>
+                                <li>• Payment processing validation (test mode)</li>
+                                <li>• Data integrity verification</li>
+                                <li>• Edge case and error scenario testing</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center font-bold">10</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-red-600">Deployment & Documentation (Day 10)</h4>
+                            <ul class="mt-2 space-y-1 text-gray-700">
+                                <li>• Production deployment and configuration</li>
+                                <li>• Staff training and dashboard setup</li>
+                                <li>• Complete documentation delivery</li>
+                                <li>• Knowledge transfer and support setup</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deliverables -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        Technical Deliverables
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-code text-blue-500 mt-1"></i>
+                            <span>Complete webhook application with error handling</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-cog text-blue-500 mt-1"></i>
+                            <span>Configured Stripe product catalog and pricing</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-table text-blue-500 mt-1"></i>
+                            <span>Optimized Airtable base with automation</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-envelope text-blue-500 mt-1"></i>
+                            <span>Mailchimp email templates and triggers</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-book text-purple-500 mr-3"></i>
+                        Documentation Package
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-file-code text-purple-500 mt-1"></i>
+                            <span>API integration documentation</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-user-cog text-purple-500 mt-1"></i>
+                            <span>Staff user guide for Airtable dashboards</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-wrench text-purple-500 mt-1"></i>
+                            <span>Maintenance and troubleshooting guide</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-shield-alt text-purple-500 mt-1"></i>
+                            <span>Security best practices documentation</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Risk Mitigation -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4">Risk Mitigation & Contingencies</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="border-l-4 border-red-500 pl-4">
+                        <h4 class="font-semibold text-red-600 mb-2">Payment Failures</h4>
+                        <p class="text-sm text-gray-600">Implement retry logic, alternative payment methods, and clear error messaging for users.</p>
+                    </div>
+                    <div class="border-l-4 border-yellow-500 pl-4">
+                        <h4 class="font-semibold text-yellow-600 mb-2">API Rate Limits</h4>
+                        <p class="text-sm text-gray-600">Queue systems and exponential backoff for high-volume registration periods.</p>
+                    </div>
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h4 class="font-semibold text-blue-600 mb-2">Data Sync Issues</h4>
+                        <p class="text-sm text-gray-600">Webhook validation, duplicate prevention, and manual reconciliation tools.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Tab -->
+        <div x-show="activeTab === 'testing'" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Testing & Quality Assurance</h2>
+                <p class="text-lg text-gray-600">Comprehensive testing strategy to ensure reliable operation</p>
+            </div>
+
+            <!-- Testing Strategy -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-vial text-blue-500 mr-3"></i>
+                        Unit Testing
+                    </h3>
+                    <div class="code-block rounded-lg p-4 overflow-x-auto mb-4">
+                        <pre><code class="language-javascript">// Example unit test for cart calculation
+describe('Cart Calculation', () => {
+  test('calculates total with sponsorship and add-ons', () => {
+    const formData = {
+      sponsorshipTier: { price: 5000 },
+      addOns: [
+        { type: 'table', price: 200, quantity: 2 },
+        { type: 'merchandise', price: 50, quantity: 5 }
+      ]
+    };
+
+    const total = calculateTotal(formData);
+    expect(total).toBe(5650); // 5000 + 400 + 250
+  });
+});</code></pre>
+                    </div>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>• Cart calculation logic</li>
+                        <li>• Data validation functions</li>
+                        <li>• API request formatting</li>
+                        <li>• Error handling scenarios</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-network-wired text-green-500 mr-3"></i>
+                        Integration Testing
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-green-800">Jotform → Webhook</h4>
+                            <p class="text-sm text-green-700">Test form submissions trigger correct webhook calls</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-blue-800">Stripe API Integration</h4>
+                            <p class="text-sm text-blue-700">Validate payment sessions and invoice generation</p>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-orange-800">Airtable Sync</h4>
+                            <p class="text-sm text-orange-700">Verify data accuracy and linked record creation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Scenarios -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">End-to-End Test Scenarios</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4 text-green-600">Happy Path Scenarios</h4>
+                        <div class="space-y-4">
+                            <div class="border border-green-200 rounded-lg p-4">
+                                <h5 class="font-semibold">Card Payment Success</h5>
+                                <ol class="text-sm mt-2 space-y-1 text-gray-700">
+                                    <li>1. User completes Jotform with card payment</li>
+                                    <li>2. Stripe checkout session created</li>
+                                    <li>3. Payment processed successfully</li>
+                                    <li>4. Data synced to Airtable</li>
+                                    <li>5. Confirmation email sent</li>
+                                </ol>
+                            </div>
+                            <div class="border border-blue-200 rounded-lg p-4">
+                                <h5 class="font-semibold">Check Payment Flow</h5>
+                                <ol class="text-sm mt-2 space-y-1 text-gray-700">
+                                    <li>1. User selects check payment option</li>
+                                    <li>2. Stripe invoice generated</li>
+                                    <li>3. Invoice email sent with instructions</li>
+                                    <li>4. Manual payment reconciliation</li>
+                                    <li>5. Status updated in Airtable</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4 text-red-600">Error Scenarios</h4>
+                        <div class="space-y-4">
+                            <div class="border border-red-200 rounded-lg p-4">
+                                <h5 class="font-semibold">Payment Failures</h5>
+                                <ul class="text-sm mt-2 space-y-1 text-gray-700">
+                                    <li>• Declined card handling</li>
+                                    <li>• Insufficient funds scenarios</li>
+                                    <li>• Network timeout recovery</li>
+                                    <li>• User abandonment flow</li>
+                                </ul>
+                            </div>
+                            <div class="border border-yellow-200 rounded-lg p-4">
+                                <h5 class="font-semibold">Integration Failures</h5>
+                                <ul class="text-sm mt-2 space-y-1 text-gray-700">
+                                    <li>• Airtable API unavailable</li>
+                                    <li>• Mailchimp delivery failures</li>
+                                    <li>• Webhook retry scenarios</li>
+                                    <li>• Data validation errors</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QA Checklist -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4">Pre-Launch QA Checklist</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3 text-blue-600">Functional Testing</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>All form fields validate correctly</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Conditional logic works as expected</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Cart totals calculate accurately</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Payment flows complete successfully</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Data appears correctly in Airtable</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3 text-purple-600">Security & Performance</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Webhook signatures validated</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>API keys secured and encrypted</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Rate limiting implemented</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Error logging configured</span>
+                            </li>
+                            <li class="flex items-center space-x-2">
+                                <input type="checkbox" class="form-checkbox" checked disabled>
+                                <span>Performance benchmarks met</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monitoring & Maintenance -->
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4">Post-Launch Monitoring</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-chart-line text-2xl text-blue-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">Performance Metrics</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>Response time monitoring</li>
+                            <li>API success rates</li>
+                            <li>Error rate tracking</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-heartbeat text-2xl text-green-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">Health Checks</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>Webhook endpoint status</li>
+                            <li>Database connectivity</li>
+                            <li>Third-party API health</li>
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-bell text-2xl text-orange-600"></i>
+                        </div>
+                        <h4 class="font-semibold mb-2">Alert System</h4>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>Payment failure alerts</li>
+                            <li>Integration error notifications</li>
+                            <li>Volume spike warnings</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-2xl font-bold mb-4">Ready to Implement This Solution?</h3>
+            <p class="text-lg mb-6">10 days to complete implementation with comprehensive testing and documentation.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Stripe Certified</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Airtable Expert</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">API Integration Specialist</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">5+ Years Experience</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function integrationDemo() {
+            return {
+                activeTab: 'architecture',
+                currentStep: 0,
+
+                startWorkflowDemo() {
+                    this.currentStep = 0;
+                    const interval = setInterval(() => {
+                        this.currentStep++;
+                        if (this.currentStep >= 5) {
+                            clearInterval(interval);
+                        }
+                    }, 1000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

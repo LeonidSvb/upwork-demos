@@ -7,9 +7,76 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Excel Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #667eea;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+
+        /* Применяем CSS переменные ко всем элементам */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+
+        .text-gray-800, .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-secondary) !important; }
+
+        .border-gray-300, .border-gray-200, .divide-gray-200 { border-color: var(--border-color) !important; }
+
+        input, select, textarea {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .hover\:bg-gray-50:hover { background-color: #374151 !important; }
+
+        /* Темная тема для таблицы */
+        [data-theme="dark"] table { color: var(--text-primary); }
+        [data-theme="dark"] thead { background-color: var(--bg-primary) !important; }
+        [data-theme="dark"] tbody { background-color: var(--bg-secondary) !important; }
+
+        body { background-color: var(--bg-primary); color: var(--text-primary); }
+
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card-shadow { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
         .animate-slide-in { animation: slideIn 0.5s ease-out; }
         @keyframes slideIn {
             from { transform: translateX(-100%); opacity: 0; }
@@ -20,13 +87,125 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .counter-animation {
+            font-variant-numeric: tabular-nums;
+            transition: all 0.3s ease;
+        }
+
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .workflow-line {
             background: linear-gradient(90deg, #4f46e5, #06b6d4, #10b981);
             height: 4px;
         }
+
+        .status-badge {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .interactive-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .interactive-row:hover {
+            background-color: var(--bg-primary);
+            transform: scale(1.01);
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #374151;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle.active {
+            background: #3b82f6;
+        }
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle.active::after {
+            transform: translateX(30px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 1100;
+            animation: toastSlideIn 0.3s ease-out;
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .filter-active {
+            background: var(--accent-color) !important;
+            color: white !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 font-sans" x-data="qcSystem()">
+<body class="bg-gray-50 font-sans" x-data="qcSystem()" x-init="init()">
     <!-- Header -->
     <header class="gradient-bg text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
@@ -49,10 +228,11 @@
                             :class="activeView === 'workflow' ? 'text-yellow-300' : 'text-white hover:text-yellow-200'"
                             class="transition-colors">Workflow</button>
                 </nav>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-4">
+                    <div class="theme-toggle" @click="toggleTheme()" :class="{ 'active': darkMode }"></div>
                     <div class="relative">
                         <i class="fas fa-bell text-xl cursor-pointer" @click="showNotifications = !showNotifications"></i>
-                        <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center" x-text="notifications.length"></span>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center counter-animation" x-text="notifications.length"></span>
                     </div>
                 </div>
             </div>
@@ -61,16 +241,100 @@
 
     <!-- Notifications Panel -->
     <div x-show="showNotifications" x-transition class="fixed top-16 right-4 bg-white rounded-lg shadow-xl p-4 w-80 z-50">
-        <h3 class="font-bold text-gray-800 mb-3">Recent Notifications</h3>
-        <template x-for="notification in notifications">
-            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded">
-                <i class="fas fa-exclamation-circle text-orange-500 mt-1"></i>
-                <div>
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-800">Recent Notifications</h3>
+            <button @click="markAllAsRead()" class="text-sm text-blue-600 hover:text-blue-800">Mark all read</button>
+        </div>
+        <template x-for="notification in notifications" :key="notification.id">
+            <div class="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer" @click="handleNotificationClick(notification)">
+                <i :class="notification.icon" class="text-orange-500 mt-1"></i>
+                <div class="flex-1">
                     <p class="text-sm font-medium" x-text="notification.title"></p>
                     <p class="text-xs text-gray-500" x-text="notification.time"></p>
                 </div>
+                <button @click.stop="removeNotification(notification.id)" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
             </div>
         </template>
+        <div x-show="notifications.length === 0" class="text-center text-gray-500 py-4">
+            <i class="fas fa-bell-slash text-2xl mb-2"></i>
+            <p class="text-sm">No new notifications</p>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div x-show="showModal" class="modal-overlay" @click="closeModal()" x-transition>
+        <div class="modal-content" @click.stop>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold" x-text="'Project #' + (selectedProject?.id || '')"></h3>
+                    <button @click="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div x-show="selectedProject" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Client</label>
+                            <p class="text-gray-900" x-text="selectedProject?.client"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Lead Painter</label>
+                            <p class="text-gray-900" x-text="selectedProject?.painter"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <span class="status-badge px-2 py-1 text-xs font-semibold rounded-full"
+                                  :class="getStatusColor(selectedProject?.status)"
+                                  x-text="getStatusText(selectedProject?.status)"></span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Progress</label>
+                            <div class="flex items-center mt-1">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" :style="`width: ${selectedProject?.progress || 0}%`"></div>
+                                </div>
+                                <span class="text-sm" x-text="(selectedProject?.progress || 0) + '%'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Recent Activities</label>
+                        <div class="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
+                            <template x-for="activity in selectedProject?.activities || []">
+                                <div class="flex items-start space-x-3 mb-2 last:mb-0">
+                                    <i class="fas fa-circle text-xs text-blue-500 mt-2"></i>
+                                    <div>
+                                        <p class="text-sm" x-text="activity.description"></p>
+                                        <p class="text-xs text-gray-500" x-text="activity.time"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors" @click="updateProjectStatus()">
+                            Update Status
+                        </button>
+                        <button class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" @click="downloadReport(selectedProject)">
+                            Download Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div x-show="toastMessage" x-transition class="toast">
+        <div class="flex items-center space-x-3">
+            <i :class="toastIcon" class="text-lg"></i>
+            <p x-text="toastMessage"></p>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -269,38 +533,41 @@
 
             <!-- Stats Cards -->
             <div class="grid md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow cursor-pointer" @click="filterProjects('all')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Active Jobs</p>
-                            <p class="text-2xl font-bold text-blue-600">24</p>
+                            <p class="text-2xl font-bold text-blue-600 counter-animation" x-text="stats.active"></p>
                         </div>
-                        <i class="fas fa-briefcase text-2xl text-blue-400"></i>
+                        <div class="relative">
+                            <i class="fas fa-briefcase text-2xl text-blue-400"></i>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full pulse"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow cursor-pointer" @click="filterProjects('billing-ready')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Billing Ready</p>
-                            <p class="text-2xl font-bold text-green-600">8</p>
+                            <p class="text-2xl font-bold text-green-600 counter-animation" x-text="stats.billingReady"></p>
                         </div>
                         <i class="fas fa-check-circle text-2xl text-green-400"></i>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow cursor-pointer" @click="filterProjects('pending-review')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Pending Review</p>
-                            <p class="text-2xl font-bold text-orange-600">5</p>
+                            <p class="text-2xl font-bold text-orange-600 counter-animation" x-text="stats.pendingReview"></p>
                         </div>
                         <i class="fas fa-clock text-2xl text-orange-400"></i>
                     </div>
                 </div>
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow cursor-pointer" @click="filterProjects('exception')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Exceptions</p>
-                            <p class="text-2xl font-bold text-red-600">2</p>
+                            <p class="text-2xl font-bold text-red-600 counter-animation" x-text="stats.exceptions"></p>
                         </div>
                         <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
                     </div>
@@ -310,23 +577,29 @@
             <!-- Filters -->
             <div class="bg-white rounded-xl p-6 card-shadow mb-8">
                 <div class="grid md:grid-cols-4 gap-4">
-                    <select class="p-3 border border-gray-300 rounded-lg">
-                        <option>All Statuses</option>
-                        <option>Billing Ready</option>
-                        <option>Pending Review</option>
-                        <option>In Progress</option>
-                        <option>Exception</option>
+                    <select class="p-3 border border-gray-300 rounded-lg" x-model="filters.status" @change="applyFilters()">
+                        <option value="">All Statuses</option>
+                        <option value="billing-ready">Billing Ready</option>
+                        <option value="pending-review">Pending Review</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="exception">Exception</option>
                     </select>
-                    <select class="p-3 border border-gray-300 rounded-lg">
-                        <option>All Painters</option>
-                        <option>Mike Rodriguez</option>
-                        <option>Sarah Johnson</option>
-                        <option>David Chen</option>
+                    <select class="p-3 border border-gray-300 rounded-lg" x-model="filters.painter" @change="applyFilters()">
+                        <option value="">All Painters</option>
+                        <option value="Mike Rodriguez">Mike Rodriguez</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="David Chen">David Chen</option>
                     </select>
-                    <input type="date" class="p-3 border border-gray-300 rounded-lg">
-                    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-filter mr-2"></i>Apply Filters
+                    <input type="date" class="p-3 border border-gray-300 rounded-lg" x-model="filters.date" @change="applyFilters()">
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" @click="resetFilters()">
+                        <i class="fas fa-refresh mr-2"></i>Reset Filters
                     </button>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2" x-show="hasActiveFilters()">
+                    <span class="text-sm text-gray-600">Active filters:</span>
+                    <template x-for="filter in getActiveFilters()">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm" x-text="filter"></span>
+                    </template>
                 </div>
             </div>
 
@@ -346,60 +619,38 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12345</td>
-                                <td class="px-6 py-4 whitespace-nowrap">ABC Corporation</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Mike Rodriguez</td>
-                                <td class="px-6 py-4 whitespace-nowrap">50%</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Billing Ready</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 hours ago</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="text-green-600 hover:text-green-800">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12346</td>
-                                <td class="px-6 py-4 whitespace-nowrap">XYZ Industries</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Sarah Johnson</td>
-                                <td class="px-6 py-4 whitespace-nowrap">100%</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Pending Review</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 hours ago</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="text-green-600 hover:text-green-800">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600">#12347</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Tech Solutions Ltd</td>
-                                <td class="px-6 py-4 whitespace-nowrap">David Chen</td>
-                                <td class="px-6 py-4 whitespace-nowrap">50%</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Exception</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 day ago</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <button class="text-blue-600 hover:text-blue-800 mr-3">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="text-red-600 hover:text-red-800">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            <template x-for="project in filteredProjects" :key="project.id">
+                                <tr class="interactive-row" @click="openProjectModal(project)">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-blue-600" x-text="'#' + project.id"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap" x-text="project.client"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap" x-text="project.painter"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" :style="`width: ${project.progress}%`"></div>
+                                            </div>
+                                            <span x-text="project.stage"></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="status-badge px-2 py-1 text-xs font-semibold rounded-full"
+                                              :class="getStatusColor(project.status)"
+                                              x-text="getStatusText(project.status)"></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="project.lastUpdate"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button class="text-blue-600 hover:text-blue-800 mr-3" @click.stop="openProjectModal(project)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-green-600 hover:text-green-800" @click.stop="downloadReport(project)">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="text-orange-600 hover:text-orange-800 ml-2" @click.stop="updateStatus(project)" x-show="project.status !== 'billing-ready'">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -575,11 +826,301 @@
             return {
                 activeView: 'overview',
                 showNotifications: false,
+                showModal: false,
+                selectedProject: null,
+                darkMode: false,
+                toastMessage: '',
+                toastIcon: '',
+
+                filters: {
+                    status: '',
+                    painter: '',
+                    date: ''
+                },
+
+                stats: {
+                    active: 0,
+                    billingReady: 0,
+                    pendingReview: 0,
+                    exceptions: 0
+                },
+
                 notifications: [
-                    { title: 'Job #12345 marked as Billing Ready', time: '2 hours ago' },
-                    { title: 'Exception flagged on Job #12347', time: '1 day ago' },
-                    { title: 'New inspection submitted by Mike Rodriguez', time: '3 hours ago' }
-                ]
+                    { id: 1, title: 'Job #12345 marked as Billing Ready', time: '2 hours ago', icon: 'fas fa-check-circle', type: 'success' },
+                    { id: 2, title: 'Exception flagged on Job #12347', time: '1 day ago', icon: 'fas fa-exclamation-triangle', type: 'warning' },
+                    { id: 3, title: 'New inspection submitted by Mike Rodriguez', time: '3 hours ago', icon: 'fas fa-plus-circle', type: 'info' }
+                ],
+
+                projects: [
+                    {
+                        id: '12345',
+                        client: 'ABC Corporation',
+                        painter: 'Mike Rodriguez',
+                        stage: '50%',
+                        status: 'billing-ready',
+                        progress: 50,
+                        lastUpdate: '2 hours ago',
+                        activities: [
+                            { description: 'Quality inspection completed', time: '2 hours ago' },
+                            { description: 'Photos uploaded to drive', time: '3 hours ago' },
+                            { description: 'First coat application started', time: '1 day ago' }
+                        ]
+                    },
+                    {
+                        id: '12346',
+                        client: 'XYZ Industries',
+                        painter: 'Sarah Johnson',
+                        stage: '100%',
+                        status: 'pending-review',
+                        progress: 100,
+                        lastUpdate: '5 hours ago',
+                        activities: [
+                            { description: 'Final inspection submitted', time: '5 hours ago' },
+                            { description: 'Cleanup completed', time: '6 hours ago' },
+                            { description: 'Second coat applied', time: '1 day ago' }
+                        ]
+                    },
+                    {
+                        id: '12347',
+                        client: 'Tech Solutions Ltd',
+                        painter: 'David Chen',
+                        stage: '30%',
+                        status: 'exception',
+                        progress: 30,
+                        lastUpdate: '1 day ago',
+                        activities: [
+                            { description: 'Exception reported: Surface prep issues', time: '1 day ago' },
+                            { description: 'Photo documentation added', time: '1 day ago' },
+                            { description: 'Project paused for review', time: '1 day ago' }
+                        ]
+                    },
+                    {
+                        id: '12348',
+                        client: 'Global Corp',
+                        painter: 'Mike Rodriguez',
+                        stage: '75%',
+                        status: 'in-progress',
+                        progress: 75,
+                        lastUpdate: '4 hours ago',
+                        activities: [
+                            { description: 'Second coat in progress', time: '4 hours ago' },
+                            { description: 'First coat quality approved', time: '8 hours ago' }
+                        ]
+                    },
+                    {
+                        id: '12349',
+                        client: 'Start-up Inc',
+                        painter: 'Sarah Johnson',
+                        stage: '90%',
+                        status: 'billing-ready',
+                        progress: 90,
+                        lastUpdate: '1 hour ago',
+                        activities: [
+                            { description: 'Final touches completed', time: '1 hour ago' },
+                            { description: 'Quality check passed', time: '2 hours ago' }
+                        ]
+                    }
+                ],
+
+                filteredProjects: [],
+
+                init() {
+                    this.filteredProjects = this.projects;
+                    this.updateStats();
+                    this.animateCounters();
+
+                    // Check for saved theme
+                    if (localStorage.getItem('darkMode') === 'true') {
+                        this.darkMode = true;
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    }
+
+                    // Simulate real-time updates
+                    setInterval(() => {
+                        this.simulateRealTimeUpdates();
+                    }, 10000);
+                },
+
+                updateStats() {
+                    this.stats.active = this.projects.length;
+                    this.stats.billingReady = this.projects.filter(p => p.status === 'billing-ready').length;
+                    this.stats.pendingReview = this.projects.filter(p => p.status === 'pending-review').length;
+                    this.stats.exceptions = this.projects.filter(p => p.status === 'exception').length;
+                },
+
+                animateCounters() {
+                    const counters = ['active', 'billingReady', 'pendingReview', 'exceptions'];
+                    counters.forEach(counter => {
+                        const target = this.stats[counter];
+                        let current = 0;
+                        const increment = target / 20;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            this.stats[counter] = Math.floor(current);
+                        }, 50);
+                    });
+                },
+
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    if (this.darkMode) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                    localStorage.setItem('darkMode', this.darkMode);
+                    this.showToast('Theme updated', 'fas fa-palette');
+                },
+
+                filterProjects(status) {
+                    if (status === 'all') {
+                        this.filteredProjects = this.projects;
+                    } else {
+                        this.filteredProjects = this.projects.filter(p => p.status === status);
+                    }
+                    this.showToast(`Filtered by ${status}`, 'fas fa-filter');
+                },
+
+                applyFilters() {
+                    let filtered = this.projects;
+
+                    if (this.filters.status) {
+                        filtered = filtered.filter(p => p.status === this.filters.status);
+                    }
+
+                    if (this.filters.painter) {
+                        filtered = filtered.filter(p => p.painter === this.filters.painter);
+                    }
+
+                    if (this.filters.date) {
+                        // Simple date filtering simulation
+                        filtered = filtered.filter(p => p.lastUpdate.includes('hour'));
+                    }
+
+                    this.filteredProjects = filtered;
+                    this.showToast(`Found ${filtered.length} projects`, 'fas fa-search');
+                },
+
+                resetFilters() {
+                    this.filters = { status: '', painter: '', date: '' };
+                    this.filteredProjects = this.projects;
+                    this.showToast('Filters reset', 'fas fa-refresh');
+                },
+
+                hasActiveFilters() {
+                    return this.filters.status || this.filters.painter || this.filters.date;
+                },
+
+                getActiveFilters() {
+                    const active = [];
+                    if (this.filters.status) active.push(`Status: ${this.filters.status}`);
+                    if (this.filters.painter) active.push(`Painter: ${this.filters.painter}`);
+                    if (this.filters.date) active.push(`Date: ${this.filters.date}`);
+                    return active;
+                },
+
+                getStatusColor(status) {
+                    const colors = {
+                        'billing-ready': 'bg-green-100 text-green-800',
+                        'pending-review': 'bg-orange-100 text-orange-800',
+                        'exception': 'bg-red-100 text-red-800',
+                        'in-progress': 'bg-blue-100 text-blue-800'
+                    };
+                    return colors[status] || 'bg-gray-100 text-gray-800';
+                },
+
+                getStatusText(status) {
+                    const texts = {
+                        'billing-ready': 'Billing Ready',
+                        'pending-review': 'Pending Review',
+                        'exception': 'Exception',
+                        'in-progress': 'In Progress'
+                    };
+                    return texts[status] || status;
+                },
+
+                openProjectModal(project) {
+                    this.selectedProject = project;
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.selectedProject = null;
+                },
+
+                updateProjectStatus() {
+                    if (this.selectedProject) {
+                        const statuses = ['in-progress', 'pending-review', 'billing-ready'];
+                        const currentIndex = statuses.indexOf(this.selectedProject.status);
+                        const nextIndex = (currentIndex + 1) % statuses.length;
+                        this.selectedProject.status = statuses[nextIndex];
+                        this.updateStats();
+                        this.showToast(`Status updated to ${this.getStatusText(this.selectedProject.status)}`, 'fas fa-check');
+                    }
+                },
+
+                downloadReport(project) {
+                    this.showToast(`Downloading report for Project #${project.id}`, 'fas fa-download');
+                    // Simulate download
+                    setTimeout(() => {
+                        this.showToast('Report downloaded successfully', 'fas fa-check-circle');
+                    }, 2000);
+                },
+
+                updateStatus(project) {
+                    this.openProjectModal(project);
+                },
+
+                markAllAsRead() {
+                    this.notifications = [];
+                    this.showToast('All notifications marked as read', 'fas fa-check');
+                },
+
+                removeNotification(id) {
+                    this.notifications = this.notifications.filter(n => n.id !== id);
+                },
+
+                handleNotificationClick(notification) {
+                    // Find related project and open modal
+                    const projectId = notification.title.match(/#(\d+)/)?.[1];
+                    if (projectId) {
+                        const project = this.projects.find(p => p.id === projectId);
+                        if (project) {
+                            this.openProjectModal(project);
+                            this.showNotifications = false;
+                        }
+                    }
+                },
+
+                showToast(message, icon) {
+                    this.toastMessage = message;
+                    this.toastIcon = icon;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 3000);
+                },
+
+                simulateRealTimeUpdates() {
+                    // Randomly update a project's progress
+                    const randomProject = this.projects[Math.floor(Math.random() * this.projects.length)];
+                    if (randomProject.progress < 100 && randomProject.status !== 'exception') {
+                        randomProject.progress = Math.min(100, randomProject.progress + Math.floor(Math.random() * 10));
+                        randomProject.lastUpdate = 'Just now';
+
+                        // Add activity
+                        randomProject.activities.unshift({
+                            description: 'Progress updated automatically',
+                            time: 'Just now'
+                        });
+
+                        this.showToast(`Project #${randomProject.id} updated`, 'fas fa-sync');
+                    }
+                }
             }
         }
     </script>
