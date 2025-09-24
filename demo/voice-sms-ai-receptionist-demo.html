@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice + SMS AI Receptionist MVP - Retell AI + GoHighLevel Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Excel Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #667eea;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --voice-color: #8b5cf6;
+            --sms-color: #06b6d4;
+            --integration-color: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --voice-color: #a855f7;
+            --sms-color: #0891b2;
+            --integration-color: #f59e0b;
+        }
+
+        * { transition: all 0.3s ease; }
+
+        /* Theme Variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+        .bg-gray-100 { background-color: var(--bg-primary) !important; }
+        .text-gray-800, .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-secondary) !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--border-color) !important; }
+
+        /* Custom Animations */
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes bounce-gentle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px currentColor; } 50% { box-shadow: 0 0 20px currentColor; } }
+
+        .pulse-slow { animation: pulse-slow 3s infinite; }
+        .slide-in { animation: slide-in 0.5s ease-out; }
+        .bounce-gentle { animation: bounce-gentle 2s infinite; }
+        .glow { animation: glow 2s infinite; }
+
+        /* Voice Call Visualization */
+        .voice-wave {
+            height: 40px;
+            background: linear-gradient(45deg, var(--voice-color), #ec4899);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-wave::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: wave-move 2s infinite;
+        }
+
+        @keyframes wave-move {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* SMS Bubbles */
+        .sms-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .sms-incoming {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+        }
+
+        .sms-outgoing {
+            background: var(--sms-color);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        /* Integration Flow */
+        .integration-arrow {
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .integration-arrow::after {
+            content: '→';
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--integration-color);
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--accent-color));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* Card Hover Effects */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Status Indicators */
+        .status-online { color: var(--success-color); }
+        .status-busy { color: var(--warning-color); }
+        .status-offline { color: var(--error-color); }
+
+        /* Modal Blur */
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive Grid */
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            animation: toast-in 0.3s ease-out forwards;
+        }
+
+        @keyframes toast-in {
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body x-data="voiceSmsDemo()" x-init="init()" :data-theme="darkMode ? 'dark' : 'light'" class="bg-gray-50 transition-colors duration-300">
+
+    <!-- Toast Notification -->
+    <div x-show="toastMessage" class="toast" x-transition>
+        <div class="flex items-center space-x-3">
+            <i :class="toastIcon" class="text-lg"></i>
+            <span x-text="toastMessage" class="text-gray-800"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-headset text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">Voice + SMS AI Receptionist</h1>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Retell AI</span>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">GoHighLevel</span>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">n8n</span>
+                        <span class="px-2 py-1 bg-cyan-100 text-cyan-800 text-xs rounded-full">Twilio</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Status Indicator -->
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full pulse-slow"></div>
+                        <span class="text-sm text-gray-600">System Online</span>
+                    </div>
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <i :class="darkMode ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button @click="activeView = 'architecture'" :class="activeView === 'architecture' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-sitemap mr-2"></i>Architecture
+                </button>
+                <button @click="activeView = 'voice'" :class="activeView === 'voice' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-phone mr-2"></i>Voice Flow
+                </button>
+                <button @click="activeView = 'sms'" :class="activeView === 'sms' ? 'border-cyan-500 text-cyan-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-sms mr-2"></i>SMS Flow
+                </button>
+                <button @click="activeView = 'memory'" :class="activeView === 'memory' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-brain mr-2"></i>Shared Memory
+                </button>
+                <button @click="activeView = 'contacts'" :class="activeView === 'contacts' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-address-book mr-2"></i>GHL Contacts
+                </button>
+                <button @click="activeView = 'workflow'" :class="activeView === 'workflow' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-project-diagram mr-2"></i>n8n Workflow
+                </button>
+                <button @click="activeView = 'compliance'" :class="activeView === 'compliance' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-shield-alt mr-2"></i>Compliance
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Architecture View -->
+        <div x-show="activeView === 'architecture'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-sitemap mr-3 text-purple-600"></i>
+                    System Architecture Overview
+                </h2>
+                <div class="architecture-grid mb-6">
+                    <div class="hover-card bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-phone text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Retell AI</h3>
+                                <p class="text-sm text-gray-600">Voice Processing</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Inbound call handling</li>
+                            <li>• 3 qualification questions</li>
+                            <li>• Real-time transcription</li>
+                            <li>• Voice response generation</li>
+                        </ul>
+                    </div>
+
+                    <div class="hover-card bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-project-diagram text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">n8n Automation</h3>
+                                <p class="text-sm text-gray-600">Workflow Engine</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Webhook processing</li>
+                            <li>• Data transformation</li>
+                            <li>• SMS flow management</li>
+                            <li>• Error handling</li>
+                        </ul>
+                    </div>
+
+                    <div class="hover-card bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-lg border border-yellow-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-database text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">GoHighLevel</h3>
+                                <p class="text-sm text-gray-600">CRM & Memory</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Contact management</li>
+                            <li>• Conversation history</li>
+                            <li>• Timeline tracking</li>
+                            <li>• Lead qualification status</li>
+                        </ul>
+                    </div>
+
+                    <div class="hover-card bg-gradient-to-br from-cyan-50 to-cyan-100 p-6 rounded-lg border border-cyan-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-cyan-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-sms text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Twilio SMS</h3>
+                                <p class="text-sm text-gray-600">SMS Gateway</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• SMS delivery</li>
+                            <li>• Same phone number</li>
+                            <li>• Message status tracking</li>
+                            <li>• Delivery confirmations</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Data Flow Diagram -->
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Flow Architecture</h3>
+                    <div class="flex items-center justify-between overflow-x-auto pb-4">
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-purple-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-phone text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700">Incoming Call</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">Webhook</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-cogs text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700">n8n Process</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">API Call</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-yellow-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-database text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700">GHL Update</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">SMS Trigger</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-cyan-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-sms text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700">SMS Sent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">✅ Core Features</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Single phone number for voice + SMS</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Shared conversation context</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Real-time qualification tracking</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Call recording & transcripts</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Compliance consent tracking</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">🚀 Technical Highlights</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-bolt text-yellow-500 mr-3"></i>
+                            <span class="text-gray-700">Production-ready MVP architecture</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-shield-alt text-blue-500 mr-3"></i>
+                            <span class="text-gray-700">TCPA/DNC compliance ready</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-sync text-purple-500 mr-3"></i>
+                            <span class="text-gray-700">Real-time sync between systems</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-chart-line text-green-500 mr-3"></i>
+                            <span class="text-gray-700">Built for lead generation scale</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-clock text-cyan-500 mr-3"></i>
+                            <span class="text-gray-700">14-day delivery timeline</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Download Architecture Report -->
+            <div class="text-center">
+                <button @click="downloadArchitectureReport()" class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-cyan-700 transition-all transform hover:scale-105">
+                    <i class="fas fa-download mr-2"></i>
+                    Download Technical Architecture Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Voice Flow View -->
+        <div x-show="activeView === 'voice'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-phone mr-3 text-purple-600"></i>
+                    Voice Call Flow Simulation
+                    <span class="ml-auto text-sm font-normal text-gray-500">Retell AI Integration</span>
+                </h2>
+
+                <!-- Call Status -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <div :class="voiceCallActive ? 'bg-green-500 pulse-slow' : 'bg-gray-400'" class="w-4 h-4 rounded-full"></div>
+                                <span x-text="voiceCallActive ? 'Call Active' : 'Ready to Receive Calls'" class="text-sm font-medium text-gray-700"></span>
+                            </div>
+                            <div class="text-sm text-gray-500">Phone: +1 (555) 123-4567</div>
+                        </div>
+                        <button @click="startVoiceDemo()" :disabled="voiceCallActive" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-play mr-2"></i>
+                            <span x-text="voiceCallActive ? 'Demo Running...' : 'Start Voice Demo'"></span>
+                        </button>
+                    </div>
+
+                    <!-- Voice Wave Visualization -->
+                    <div x-show="voiceCallActive" class="voice-wave mb-4" x-transition>
+                        <div class="flex items-center justify-center h-full">
+                            <span class="text-white font-medium">Voice AI Processing...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call Steps -->
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Left: Call Flow -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Call Processing Steps</h3>
+                            <div class="space-y-3">
+                                <!-- Step 1 -->
+                                <div :class="currentCallStep >= 1 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'" class="p-4 rounded-lg border transition-all">
+                                    <div class="flex items-center">
+                                        <div :class="currentCallStep >= 1 ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-800">Call Received</div>
+                                            <div class="text-sm text-gray-600">Retell AI answers within 2 seconds</div>
+                                        </div>
+                                        <i x-show="currentCallStep >= 1" class="fas fa-check text-green-500" x-transition></i>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2 -->
+                                <div :class="currentCallStep >= 2 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'" class="p-4 rounded-lg border transition-all">
+                                    <div class="flex items-center">
+                                        <div :class="currentCallStep >= 2 ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-800">Qualification Questions</div>
+                                            <div class="text-sm text-gray-600">3 custom questions asked</div>
+                                        </div>
+                                        <i x-show="currentCallStep >= 2" class="fas fa-check text-green-500" x-transition></i>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3 -->
+                                <div :class="currentCallStep >= 3 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'" class="p-4 rounded-lg border transition-all">
+                                    <div class="flex items-center">
+                                        <div :class="currentCallStep >= 3 ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-800">Data Capture</div>
+                                            <div class="text-sm text-gray-600">Call details → n8n webhook</div>
+                                        </div>
+                                        <i x-show="currentCallStep >= 3" class="fas fa-check text-green-500" x-transition></i>
+                                    </div>
+                                </div>
+
+                                <!-- Step 4 -->
+                                <div :class="currentCallStep >= 4 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'" class="p-4 rounded-lg border transition-all">
+                                    <div class="flex items-center">
+                                        <div :class="currentCallStep >= 4 ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">4</div>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-800">GHL Contact Created</div>
+                                            <div class="text-sm text-gray-600">Lead record with conversation context</div>
+                                        </div>
+                                        <i x-show="currentCallStep >= 4" class="fas fa-check text-green-500" x-transition></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Live Transcript -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Live Call Transcript</h3>
+                            <div class="bg-gray-900 text-green-400 p-4 rounded-lg h-80 overflow-y-auto font-mono text-sm">
+                                <div x-show="currentCallStep === 0" class="text-gray-500">Waiting for call...</div>
+                                <div x-show="currentCallStep >= 1" class="slide-in">
+                                    <div class="text-yellow-400">[00:01]</div>
+                                    <div><strong>AI:</strong> Hello! Thank you for calling LeadBoss Realty. I'm your AI assistant. How can I help you today?</div>
+                                    <br>
+                                </div>
+                                <div x-show="currentCallStep >= 2" class="slide-in">
+                                    <div class="text-yellow-400">[00:05]</div>
+                                    <div><strong>Caller:</strong> Hi, I'm interested in selling my property.</div>
+                                    <div class="text-yellow-400">[00:08]</div>
+                                    <div><strong>AI:</strong> Great! I'd love to help you with that. May I ask you a few quick questions to better assist you?</div>
+                                    <div class="text-yellow-400">[00:12]</div>
+                                    <div><strong>Caller:</strong> Sure, go ahead.</div>
+                                    <br>
+                                </div>
+                                <div x-show="currentCallStep >= 3" class="slide-in">
+                                    <div class="text-yellow-400">[00:15]</div>
+                                    <div><strong>AI:</strong> What type of property are you looking to sell?</div>
+                                    <div class="text-yellow-400">[00:17]</div>
+                                    <div><strong>Caller:</strong> It's a 3-bedroom house in downtown.</div>
+                                    <div class="text-yellow-400">[00:20]</div>
+                                    <div><strong>AI:</strong> Perfect! What's your timeline for selling?</div>
+                                    <div class="text-yellow-400">[00:22]</div>
+                                    <div><strong>Caller:</strong> Within the next 3 months ideally.</div>
+                                    <br>
+                                </div>
+                                <div x-show="currentCallStep >= 4" class="slide-in">
+                                    <div class="text-yellow-400">[00:25]</div>
+                                    <div><strong>AI:</strong> Excellent! One last question - have you worked with a real estate agent before?</div>
+                                    <div class="text-yellow-400">[00:28]</div>
+                                    <div><strong>Caller:</strong> No, this is my first time selling.</div>
+                                    <div class="text-cyan-400">[SYSTEM]</div>
+                                    <div class="text-cyan-400">→ Contact created in GoHighLevel</div>
+                                    <div class="text-cyan-400">→ Lead score: High priority</div>
+                                    <div class="text-cyan-400">→ Follow-up SMS scheduled</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call Analytics -->
+                <div class="mt-6 grid md:grid-cols-4 gap-4">
+                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Call Duration</p>
+                                <p x-text="voiceCallActive ? '00:' + (currentCallStep * 10).toString().padStart(2, '0') : '00:00'" class="text-2xl font-bold text-purple-600"></p>
+                            </div>
+                            <i class="fas fa-clock text-purple-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Response Time</p>
+                                <p class="text-2xl font-bold text-green-600">1.8s</p>
+                            </div>
+                            <i class="fas fa-tachometer-alt text-green-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Confidence</p>
+                                <p class="text-2xl font-bold text-blue-600">94%</p>
+                            </div>
+                            <i class="fas fa-brain text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Lead Score</p>
+                                <p x-text="currentCallStep >= 4 ? 'High' : 'Processing...'" class="text-2xl font-bold text-yellow-600"></p>
+                            </div>
+                            <i class="fas fa-star text-yellow-400 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Configuration -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Voice AI Configuration</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-3">Qualification Questions</h4>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-gray-50 rounded border">
+                                <strong>Q1:</strong> What type of property are you looking to sell?
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded border">
+                                <strong>Q2:</strong> What's your timeline for selling?
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded border">
+                                <strong>Q3:</strong> Have you worked with a real estate agent before?
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-3">AI Personality Settings</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Friendliness</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="progress-bar w-32">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">85%</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Professionalism</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="progress-bar w-32">
+                                        <div class="progress-fill" style="width: 95%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">95%</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Response Speed</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="progress-bar w-32">
+                                        <div class="progress-fill" style="width: 92%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium">92%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SMS Flow View -->
+        <div x-show="activeView === 'sms'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-sms mr-3 text-cyan-600"></i>
+                    SMS Conversation Flow
+                    <span class="ml-auto text-sm font-normal text-gray-500">Twilio + n8n Integration</span>
+                </h2>
+
+                <!-- SMS Controls -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-500">Phone: +1 (555) 123-4567</div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-cyan-500 rounded-full pulse-slow"></div>
+                            <span class="text-sm font-medium text-gray-700">SMS Ready</span>
+                        </div>
+                    </div>
+                    <button @click="startSmsDemo()" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-colors">
+                        <i class="fas fa-play mr-2"></i>
+                        Start SMS Demo
+                    </button>
+                </div>
+
+                <!-- SMS Conversation -->
+                <div class="bg-gray-100 rounded-lg p-4 h-96 overflow-y-auto">
+                    <div class="flex flex-col space-y-3">
+                        <!-- Initial SMS messages will be populated via JS -->
+                        <template x-for="message in smsMessages" :key="message.id">
+                            <div :class="message.type === 'incoming' ? 'sms-incoming' : 'sms-outgoing'" class="sms-bubble slide-in">
+                                <div class="text-sm mb-1" x-text="message.sender"></div>
+                                <div x-text="message.text"></div>
+                                <div class="text-xs opacity-75 mt-1" x-text="message.time"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- SMS Analytics -->
+                <div class="mt-6 grid md:grid-cols-4 gap-4">
+                    <div class="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Messages Sent</p>
+                                <p x-text="smsMessages.filter(m => m.type === 'outgoing').length" class="text-2xl font-bold text-cyan-600"></p>
+                            </div>
+                            <i class="fas fa-paper-plane text-cyan-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Response Rate</p>
+                                <p class="text-2xl font-bold text-green-600">87%</p>
+                            </div>
+                            <i class="fas fa-reply text-green-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Avg Response</p>
+                                <p class="text-2xl font-bold text-blue-600">2.3s</p>
+                            </div>
+                            <i class="fas fa-stopwatch text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Engagement</p>
+                                <p class="text-2xl font-bold text-purple-600">94%</p>
+                            </div>
+                            <i class="fas fa-heart text-purple-400 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shared Memory View -->
+        <div x-show="activeView === 'memory'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-brain mr-3 text-yellow-600"></i>
+                    Shared Memory System
+                    <span class="ml-auto text-sm font-normal text-gray-500">Voice ↔ SMS Context Bridge</span>
+                </h2>
+
+                <!-- Memory Flow Diagram -->
+                <div class="bg-gradient-to-r from-purple-50 to-cyan-50 p-6 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Context Flow Architecture</h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="bg-purple-500 text-white p-4 rounded-lg mb-3">
+                                <i class="fas fa-phone text-2xl mb-2"></i>
+                                <div class="font-semibold">Voice Call</div>
+                                <div class="text-sm opacity-90">Retell AI captures context</div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                • Call transcript<br>
+                                • Qualification answers<br>
+                                • Lead scoring data
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="bg-yellow-500 text-white p-4 rounded-lg mb-3">
+                                <i class="fas fa-database text-2xl mb-2"></i>
+                                <div class="font-semibold">GoHighLevel</div>
+                                <div class="text-sm opacity-90">Central memory storage</div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                • Contact record<br>
+                                • Custom fields<br>
+                                • Timeline events
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="bg-cyan-500 text-white p-4 rounded-lg mb-3">
+                                <i class="fas fa-sms text-2xl mb-2"></i>
+                                <div class="font-semibold">SMS Flow</div>
+                                <div class="text-sm opacity-90">Reads stored context</div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                • Previous conversation<br>
+                                • Qualification status<br>
+                                • Personalized responses
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memory Demo -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-800 mb-3">Contact Memory Structure</h4>
+                        <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm overflow-x-auto">
+<pre>{
+  "contact_id": "12345",
+  "phone": "+15551234567",
+  "conversation_context": {
+    "voice_call": {
+      "timestamp": "2024-01-15T14:30:00Z",
+      "duration": "180s",
+      "qualification": {
+        "property_type": "3-bedroom house",
+        "location": "downtown",
+        "timeline": "3 months",
+        "experience": "first-time seller"
+      },
+      "lead_score": "high",
+      "transcript_url": "recordings/call-12345.mp3"
+    },
+    "last_interaction": "voice",
+    "next_followup": "sms_scheduled"
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                            <h4 class="font-semibold text-purple-800 mb-2">Voice → Memory</h4>
+                            <p class="text-sm text-gray-700">Call ends → n8n webhook → GHL contact update with full context</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h4 class="font-semibold text-yellow-800 mb-2">Memory Storage</h4>
+                            <p class="text-sm text-gray-700">GoHighLevel custom fields store structured conversation data</p>
+                        </div>
+                        <div class="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
+                            <h4 class="font-semibold text-cyan-800 mb-2">Memory → SMS</h4>
+                            <p class="text-sm text-gray-700">SMS trigger reads GHL contact data for personalized responses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GoHighLevel Contacts View -->
+        <div x-show="activeView === 'contacts'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-address-book mr-3 text-green-600"></i>
+                    GoHighLevel Contact Management
+                    <span class="ml-auto text-sm font-normal text-gray-500">CRM Integration</span>
+                </h2>
+
+                <!-- Sample Contacts -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeline</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Contact</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">John Smith</div>
+                                    <div class="text-sm text-gray-500">+1 (555) 123-4567</div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">3BR House Downtown</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">3 months</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">Voice + SMS</td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">High Priority</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Sarah Johnson</div>
+                                    <div class="text-sm text-gray-500">+1 (555) 987-6543</div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">2BR Condo</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">6 months</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">Voice only</td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Medium</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- n8n Workflow View -->
+        <div x-show="activeView === 'workflow'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-project-diagram mr-3 text-blue-600"></i>
+                    n8n Workflow Automation
+                    <span class="ml-auto text-sm font-normal text-gray-500">Process Engine</span>
+                </h2>
+
+                <!-- Workflow Visualization -->
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Voice → SMS Workflow</h3>
+                    <div class="flex items-center justify-between overflow-x-auto pb-4">
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-webhook text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700 font-medium">Webhook Trigger</p>
+                            <p class="text-xs text-gray-500">Retell AI call end</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">POST</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-code text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700 font-medium">Data Transform</p>
+                            <p class="text-xs text-gray-500">Parse call data</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">API</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-yellow-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-database text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700 font-medium">GHL Update</p>
+                            <p class="text-xs text-gray-500">Create/update contact</p>
+                        </div>
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">Trigger</p>
+                            </div>
+                        </div>
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-16 h-16 mx-auto bg-cyan-500 rounded-full flex items-center justify-center mb-2">
+                                <i class="fas fa-sms text-white text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-700 font-medium">SMS Send</p>
+                            <p class="text-xs text-gray-500">Personalized follow-up</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance View -->
+        <div x-show="activeView === 'compliance'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-shield-alt mr-3 text-red-600"></i>
+                    Compliance & Consent Management
+                    <span class="ml-auto text-sm font-normal text-gray-500">TCPA/DNC Ready</span>
+                </h2>
+
+                <!-- Compliance Features -->
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="text-lg font-semibold text-green-800 mb-4">✅ Implemented Features</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Consent capture on initial call</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Timestamp logging for all interactions</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Opt-out mechanisms in SMS</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-3"></i>
+                                <span class="text-gray-700">Call recording disclosure</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                        <h3 class="text-lg font-semibold text-yellow-800 mb-4">📋 Optional Add-ons</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <i class="fas fa-plus text-yellow-500 mr-3"></i>
+                                <span class="text-gray-700">DNC national scrub integration</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-plus text-yellow-500 mr-3"></i>
+                                <span class="text-gray-700">HIPAA-compliant architecture</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-plus text-yellow-500 mr-3"></i>
+                                <span class="text-gray-700">Advanced consent management</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-plus text-yellow-500 mr-3"></i>
+                                <span class="text-gray-700">Automated compliance reporting</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Consent Flow -->
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Consent Capture Flow</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                            <div>
+                                <div class="font-medium text-gray-800">Call Disclosure</div>
+                                <div class="text-sm text-gray-600">AI states: "This call may be recorded for quality and training purposes"</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                            <div>
+                                <div class="font-medium text-gray-800">SMS Consent</div>
+                                <div class="text-sm text-gray-600">AI asks: "Can we send you follow-up information via text message?"</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                            <div>
+                                <div class="font-medium text-gray-800">Data Storage</div>
+                                <div class="text-sm text-gray-600">Consent status, timestamp, and source logged in GoHighLevel</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function voiceSmsDemo() {
+            return {
+                // UI State
+                activeView: 'architecture',
+                darkMode: localStorage.getItem('darkMode') === 'true' || false,
+                showModal: false,
+                toastMessage: '',
+                toastIcon: '',
+
+                // Demo State
+                voiceCallActive: false,
+                currentCallStep: 0,
+                smsMessages: [],
+                systemStats: {
+                    callsToday: 0,
+                    smsMessages: 0,
+                    leadsGenerated: 0,
+                    conversionRate: 0
+                },
+
+                // Initialize
+                init() {
+                    this.loadSystemStats();
+                    this.startRealtimeUpdates();
+                    this.showToast('System initialized successfully!', 'fas fa-check-circle text-green-500');
+                },
+
+                // Theme Management
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                    this.showToast(`Switched to ${this.darkMode ? 'dark' : 'light'} theme`, 'fas fa-palette text-purple-500');
+                },
+
+                // Load System Stats
+                loadSystemStats() {
+                    // Simulate real-time data
+                    this.systemStats = {
+                        callsToday: Math.floor(Math.random() * 50) + 20,
+                        smsMessages: Math.floor(Math.random() * 150) + 80,
+                        leadsGenerated: Math.floor(Math.random() * 25) + 10,
+                        conversionRate: (Math.random() * 30 + 15).toFixed(1)
+                    };
+
+                    // Animate counters
+                    this.animateCounters();
+                },
+
+                // Animate Counter Numbers
+                animateCounters() {
+                    const stats = ['callsToday', 'smsMessages', 'leadsGenerated'];
+                    stats.forEach(stat => {
+                        const target = this.systemStats[stat];
+                        let current = 0;
+                        const increment = target / 30;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            this.systemStats[stat] = Math.floor(current);
+                        }, 50);
+                    });
+                },
+
+                // Real-time Updates
+                startRealtimeUpdates() {
+                    setInterval(() => {
+                        // Simulate new calls and messages
+                        if (Math.random() > 0.8) {
+                            this.systemStats.callsToday++;
+                            this.showToast('New call received!', 'fas fa-phone text-purple-500');
+                        }
+                        if (Math.random() > 0.7) {
+                            this.systemStats.smsMessages++;
+                        }
+                    }, 10000);
+                },
+
+                // Voice Demo Functions
+                startVoiceDemo() {
+                    if (this.voiceCallActive) return;
+
+                    this.voiceCallActive = true;
+                    this.currentCallStep = 0;
+                    this.showToast('Voice demo started!', 'fas fa-phone text-purple-500');
+
+                    // Simulate call steps
+                    setTimeout(() => this.currentCallStep = 1, 1000);
+                    setTimeout(() => this.currentCallStep = 2, 3000);
+                    setTimeout(() => this.currentCallStep = 3, 6000);
+                    setTimeout(() => {
+                        this.currentCallStep = 4;
+                        this.showToast('Lead created in GoHighLevel!', 'fas fa-check-circle text-green-500');
+                        setTimeout(() => {
+                            this.voiceCallActive = false;
+                            this.showToast('Voice demo completed!', 'fas fa-flag-checkered text-blue-500');
+                        }, 3000);
+                    }, 9000);
+                },
+
+                // SMS Demo Functions
+                startSmsDemo() {
+                    this.smsMessages = [];
+                    this.showToast('SMS demo started!', 'fas fa-sms text-cyan-500');
+
+                    // Simulate SMS conversation
+                    const messages = [
+                        { id: 1, type: 'outgoing', sender: 'LeadBoss AI', text: 'Hi! Thanks for your call earlier. I wanted to follow up about selling your 3-bedroom house downtown. When would be a good time to discuss next steps?', time: '2:30 PM' },
+                        { id: 2, type: 'incoming', sender: 'John Smith', text: 'Hi! Thanks for reaching out. I\'m available this evening after 6 PM.', time: '2:45 PM' },
+                        { id: 3, type: 'outgoing', sender: 'LeadBoss AI', text: 'Perfect! I\'ll have one of our senior agents call you at 6:15 PM. In the meantime, would you like a free market analysis of your property?', time: '2:47 PM' },
+                        { id: 4, type: 'incoming', sender: 'John Smith', text: 'Yes, that would be great!', time: '2:48 PM' },
+                        { id: 5, type: 'outgoing', sender: 'LeadBoss AI', text: 'Excellent! I\'ve scheduled the market analysis and your call. You\'ll receive both today. Is there anything specific about the selling process you\'d like to know?', time: '2:49 PM' }
+                    ];
+
+                    messages.forEach((msg, index) => {
+                        setTimeout(() => {
+                            this.smsMessages.push(msg);
+                            if (index === messages.length - 1) {
+                                this.showToast('SMS conversation completed!', 'fas fa-comments text-green-500');
+                            }
+                        }, (index + 1) * 2000);
+                    });
+                },
+
+                // Download Reports
+                downloadArchitectureReport() {
+                    try {
+                        const { jsPDF } = window.jsPDF;
+                        const doc = new jsPDF();
+
+                        // Header
+                        doc.setFontSize(20);
+                        doc.setTextColor(102, 126, 234);
+                        doc.text('Voice + SMS AI Receptionist', 20, 30);
+                        doc.text('Technical Architecture Report', 20, 45);
+
+                        // Separator line
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(20, 55, 190, 55);
+
+                        // System Overview
+                        doc.setFontSize(14);
+                        doc.setTextColor(0, 0, 0);
+                        doc.text('System Overview', 20, 70);
+
+                        doc.setFontSize(10);
+                        doc.text('• Retell AI for voice processing and real-time conversation', 20, 80);
+                        doc.text('• n8n for workflow automation and data processing', 20, 90);
+                        doc.text('• GoHighLevel as CRM and shared memory storage', 20, 100);
+                        doc.text('• Twilio for SMS delivery via GoHighLevel integration', 20, 110);
+
+                        // Data Flow
+                        doc.setFontSize(14);
+                        doc.text('Data Flow Architecture', 20, 130);
+                        doc.setFontSize(10);
+                        doc.text('1. Incoming call → Retell AI processes voice', 20, 140);
+                        doc.text('2. Call data → n8n webhook for processing', 20, 150);
+                        doc.text('3. n8n → GoHighLevel contact creation/update', 20, 160);
+                        doc.text('4. SMS trigger → Reads GHL contact data', 20, 170);
+                        doc.text('5. Response generation → Twilio SMS delivery', 20, 180);
+
+                        // Key Features
+                        doc.setFontSize(14);
+                        doc.text('Core Features', 20, 200);
+                        doc.setFontSize(10);
+                        doc.text('✓ Single phone number for voice + SMS', 20, 210);
+                        doc.text('✓ Shared conversation context across channels', 20, 220);
+                        doc.text('✓ Real-time call recording and transcription', 20, 230);
+                        doc.text('✓ TCPA compliance with consent tracking', 20, 240);
+                        doc.text('✓ 14-day MVP delivery timeline', 20, 250);
+
+                        // Stats
+                        doc.setFontSize(12);
+                        doc.text('Current System Performance', 20, 270);
+                        doc.setFontSize(10);
+                        doc.text(`Calls Today: ${this.systemStats.callsToday}`, 20, 280);
+                        doc.text(`SMS Messages: ${this.systemStats.smsMessages}`, 80, 280);
+                        doc.text(`Leads Generated: ${this.systemStats.leadsGenerated}`, 140, 280);
+
+                        doc.save('Voice-SMS-AI-Architecture-Report.pdf');
+                        this.showToast('Architecture report downloaded!', 'fas fa-file-pdf text-red-500');
+                    } catch (error) {
+                        this.showToast('Error generating PDF', 'fas fa-exclamation-triangle text-red-500');
+                    }
+                },
+
+                // Toast Notifications
+                showToast(message, icon) {
+                    this.toastMessage = message;
+                    this.toastIcon = icon;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 4000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
