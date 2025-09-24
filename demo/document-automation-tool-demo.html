@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Automation Tool - PDF to Word Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --pdf-color: #dc2626;
+            --word-color: #2563eb;
+            --ai-color: #8b5cf6;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #60a5fa;
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
+            --error-color: #f87171;
+        }
+
+        * { transition: all 0.3s ease; }
+
+        /* Theme Variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+        .bg-gray-100 { background-color: var(--bg-primary) !important; }
+        .text-gray-800, .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-secondary) !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--border-color) !important; }
+
+        /* Custom Animations */
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes processing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes data-flow { 0% { transform: translateX(-100%); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(100%); opacity: 0; } }
+
+        .pulse-slow { animation: pulse-slow 3s infinite; }
+        .slide-in { animation: slide-in 0.5s ease-out; }
+        .processing { animation: processing 2s linear infinite; }
+        .data-flow { animation: data-flow 3s infinite; }
+
+        /* File Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent-color);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), var(--bg-secondary));
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), var(--bg-secondary));
+            transform: scale(1.02);
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-primary);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        /* Mapping Connection Lines */
+        .mapping-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, var(--pdf-color), var(--word-color));
+            transform-origin: left center;
+            z-index: 10;
+        }
+
+        /* Document Preview */
+        .document-preview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .highlight-change {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 3px solid var(--success-color);
+            padding: 2px 4px;
+            margin: 2px 0;
+        }
+
+        .source-reference {
+            color: var(--pdf-color);
+            font-size: 0.8em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .source-reference:hover {
+            background: rgba(220, 38, 38, 0.1);
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+
+        /* AI Processing Visualization */
+        .ai-node {
+            background: linear-gradient(135deg, var(--ai-color), #a855f7);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-node::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: ai-shine 3s infinite;
+        }
+
+        @keyframes ai-shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        /* File Upload Status */
+        .file-status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .file-status.processing {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .file-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        /* Extracted Data Cards */
+        .data-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 8px 0;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .data-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+
+        .data-card.selected {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), var(--bg-secondary));
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            animation: toast-in 0.3s ease-out forwards;
+        }
+
+        @keyframes toast-in {
+            to { transform: translateX(0); }
+        }
+
+        /* Responsive Grid */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        /* Card hover effects */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body x-data="documentAutomation()" x-init="init()" :data-theme="darkMode ? 'dark' : 'light'" class="bg-gray-50 transition-colors duration-300">
+
+    <!-- Toast Notification -->
+    <div x-show="toastMessage" class="toast" x-transition>
+        <div class="flex items-center space-x-3">
+            <i :class="toastIcon" class="text-lg"></i>
+            <span x-text="toastMessage" class="text-gray-800"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-alt text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">Document Automation Tool</h1>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">PDF Analysis</span>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Word Updates</span>
+                        <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">AI Processing</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Processing Status -->
+                    <div class="flex items-center space-x-2">
+                        <div :class="processingStatus === 'idle' ? 'bg-gray-400' : processingStatus === 'processing' ? 'bg-yellow-500 processing' : 'bg-green-500'" class="w-3 h-3 rounded-full"></div>
+                        <span x-text="processingStatus === 'idle' ? 'Ready' : processingStatus === 'processing' ? 'Processing...' : 'Complete'" class="text-sm text-gray-600"></span>
+                    </div>
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <i :class="darkMode ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button @click="activeView = 'upload'" :class="activeView === 'upload' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-upload mr-2"></i>Document Upload
+                </button>
+                <button @click="activeView = 'analysis'" :class="activeView === 'analysis' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-search mr-2"></i>PDF Analysis
+                </button>
+                <button @click="activeView = 'mapping'" :class="activeView === 'mapping' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-project-diagram mr-2"></i>Data Mapping
+                </button>
+                <button @click="activeView = 'preview'" :class="activeView === 'preview' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-eye mr-2"></i>Document Preview
+                </button>
+                <button @click="activeView = 'automation'" :class="activeView === 'automation' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-cogs mr-2"></i>AI Engine
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Document Upload View -->
+        <div x-show="activeView === 'upload'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-upload mr-3 text-blue-600"></i>
+                    Document Upload
+                    <span class="ml-auto text-sm font-normal text-gray-500">PDF → Word Automation</span>
+                </h2>
+
+                <!-- Upload Section -->
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- PDF Upload -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-file-pdf text-red-600 mr-2"></i>
+                            Source Document (Doc A)
+                        </h3>
+                        <div class="drop-zone" :class="{'dragover': isDragging}"
+                             @dragover.prevent="isDragging = true"
+                             @dragleave.prevent="isDragging = false"
+                             @drop.prevent="handlePdfDrop($event)">
+                            <div class="flex flex-col items-center space-y-4">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-file-pdf text-red-600 text-2xl"></i>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-lg font-medium text-gray-800">Drop PDF here</p>
+                                    <p class="text-sm text-gray-600">Annual report, financial statements</p>
+                                    <p class="text-xs text-gray-500 mt-2">Supports tables, graphs, and text extraction</p>
+                                </div>
+                                <button @click="uploadPdf()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                    Choose PDF File
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PDF Status -->
+                        <div x-show="pdfFile.name" class="file-status success mt-4">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <div class="font-medium" x-text="pdfFile.name"></div>
+                                <div class="text-sm" x-text="pdfFile.size"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Word Upload -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-file-word text-blue-600 mr-2"></i>
+                            Target Document (Doc B)
+                        </h3>
+                        <div class="drop-zone" @drop.prevent="handleWordDrop($event)">
+                            <div class="flex flex-col items-center space-y-4">
+                                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-file-word text-blue-600 text-2xl"></i>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-lg font-medium text-gray-800">Drop Word document here</p>
+                                    <p class="text-sm text-gray-600">Report to be updated (~150 pages)</p>
+                                    <p class="text-xs text-gray-500 mt-2">Will be updated with data from PDF</p>
+                                </div>
+                                <button @click="uploadWord()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    Choose Word File
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Word Status -->
+                        <div x-show="wordFile.name" class="file-status success mt-4">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <div class="font-medium" x-text="wordFile.name"></div>
+                                <div class="text-sm" x-text="wordFile.size + ' • 150 pages'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Button -->
+                <div class="text-center" x-show="pdfFile.name && wordFile.name">
+                    <button @click="startProcessing()" :disabled="processingStatus === 'processing'"
+                            class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        <i :class="processingStatus === 'processing' ? 'fas fa-spinner processing' : 'fas fa-magic'" class="mr-2"></i>
+                        <span x-text="processingStatus === 'processing' ? 'Processing Documents...' : 'Start AI Analysis'"></span>
+                    </button>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid md:grid-cols-3 gap-6 mt-8">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">PDF Processing</p>
+                                <p class="text-2xl font-bold">99.8%</p>
+                            </div>
+                            <i class="fas fa-file-pdf text-2xl opacity-75"></i>
+                        </div>
+                        <p class="text-xs opacity-75 mt-1">Accuracy rate</p>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Word Updates</p>
+                                <p class="text-2xl font-bold">150</p>
+                            </div>
+                            <i class="fas fa-file-word text-2xl opacity-75"></i>
+                        </div>
+                        <p class="text-xs opacity-75 mt-1">Pages handled</p>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Processing Speed</p>
+                                <p class="text-2xl font-bold">2.5s</p>
+                            </div>
+                            <i class="fas fa-bolt text-2xl opacity-75"></i>
+                        </div>
+                        <p class="text-xs opacity-75 mt-1">Per page average</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF Analysis View -->
+        <div x-show="activeView === 'analysis'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-search mr-3 text-red-600"></i>
+                    PDF Analysis Dashboard
+                    <span class="ml-auto text-sm font-normal text-gray-500">AI Extraction Results</span>
+                </h2>
+
+                <!-- Extraction Summary -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Data Points</p>
+                                <p x-text="extractedData.length" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-database text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Tables Found</p>
+                                <p x-text="extractedData.filter(item => item.type === 'table').length" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-table text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Charts Found</p>
+                                <p x-text="extractedData.filter(item => item.type === 'chart').length" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-chart-pie text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Avg Confidence</p>
+                                <p x-text="Math.round(extractedData.reduce((sum, item) => sum + item.confidence, 0) / extractedData.length) + '%'" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-brain text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extracted Data Cards -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Extracted Information</h3>
+                    <template x-for="item in extractedData" :key="item.id">
+                        <div class="data-card" :class="{'selected': item.selected}" @click="item.selected = !item.selected">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div :class="item.type === 'table' ? 'bg-blue-100 text-blue-600' : item.type === 'chart' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'" class="w-10 h-10 rounded-lg flex items-center justify-center">
+                                        <i :class="item.type === 'table' ? 'fas fa-table' : item.type === 'chart' ? 'fas fa-chart-pie' : 'fas fa-align-left'"></i>
+                                    </div>
+                                    <div>
+                                        <h4 x-text="item.title" class="font-semibold text-gray-800"></h4>
+                                        <p class="text-sm text-gray-600">
+                                            <span class="source-reference" x-text="'Page ' + item.page"></span> •
+                                            <span x-text="item.confidence + '% confidence'"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div x-show="item.selected" class="text-green-500">
+                                    <i class="fas fa-check-circle text-xl"></i>
+                                </div>
+                            </div>
+                            <p x-text="item.content" class="text-gray-700 text-sm"></p>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center space-x-4 mt-8">
+                    <button @click="activeView = 'mapping'" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        Create Mappings
+                    </button>
+                    <button class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Mapping View -->
+        <div x-show="activeView === 'mapping'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-project-diagram mr-3 text-purple-600"></i>
+                    Data Mapping Interface
+                    <span class="ml-auto text-sm font-normal text-gray-500">PDF → Word Connections</span>
+                </h2>
+
+                <!-- Mapping Interface -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Source Data (PDF) -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-red-600 mb-4 flex items-center">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            Source Data (PDF)
+                        </h3>
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <template x-for="item in extractedData.filter(d => d.selected)" :key="item.id">
+                                <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 x-text="item.title" class="font-medium text-gray-800"></h4>
+                                        <span class="source-reference" x-text="'Page ' + item.page"></span>
+                                    </div>
+                                    <p x-text="item.content.substring(0, 100) + '...'" class="text-sm text-gray-600"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Target Sections (Word) -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-4 flex items-center">
+                            <i class="fas fa-file-word mr-2"></i>
+                            Target Sections (Word)
+                        </h3>
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer">
+                                <h4 class="font-medium text-gray-800">Executive Summary</h4>
+                                <p class="text-sm text-gray-600">Pages 2-4 • Financial overview section</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer">
+                                <h4 class="font-medium text-gray-800">Revenue Analysis</h4>
+                                <p class="text-sm text-gray-600">Pages 15-20 • Quarterly breakdown table</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer">
+                                <h4 class="font-medium text-gray-800">Market Position</h4>
+                                <p class="text-sm text-gray-600">Pages 42-45 • Competitive analysis charts</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer">
+                                <h4 class="font-medium text-gray-800">Financial Projections</h4>
+                                <p class="text-sm text-gray-600">Pages 67-72 • Future outlook tables</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mapping Actions -->
+                <div class="text-center mt-8">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="font-semibold text-gray-800 mb-3">Automatic Mapping Suggestions</h4>
+                        <p class="text-sm text-gray-600 mb-4">AI has identified potential matches based on content similarity</p>
+                        <div class="flex justify-center space-x-4">
+                            <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fas fa-magic mr-2"></i>
+                                Apply AI Mappings
+                            </button>
+                            <button @click="activeView = 'preview'" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-eye mr-2"></i>
+                                Preview Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Preview View -->
+        <div x-show="activeView === 'preview'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-eye mr-3 text-green-600"></i>
+                    Document Preview
+                    <span class="ml-auto text-sm font-normal text-gray-500">Before & After Comparison</span>
+                </h2>
+
+                <!-- Preview Controls -->
+                <div class="flex justify-center mb-6">
+                    <div class="bg-gray-100 p-1 rounded-lg">
+                        <button :class="previewMode === 'before' ? 'bg-white shadow-sm' : ''" @click="previewMode = 'before'" class="px-4 py-2 rounded-md transition-all">
+                            Before Update
+                        </button>
+                        <button :class="previewMode === 'after' ? 'bg-white shadow-sm' : ''" @click="previewMode = 'after'" class="px-4 py-2 rounded-md transition-all">
+                            After Update
+                        </button>
+                        <button :class="previewMode === 'changes' ? 'bg-white shadow-sm' : ''" @click="previewMode = 'changes'" class="px-4 py-2 rounded-md transition-all">
+                            Changes Only
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Document Content -->
+                <div class="document-preview">
+                    <div x-show="previewMode === 'before'" class="slide-in">
+                        <h3 class="text-xl font-bold mb-4">Executive Summary</h3>
+                        <p class="mb-4">Our company has experienced significant growth over the past fiscal year. The financial performance demonstrates strong market position and operational efficiency.</p>
+
+                        <h4 class="text-lg font-semibold mb-2">Revenue Performance</h4>
+                        <p class="mb-4">Revenue figures for the year show consistent growth across all quarters with particularly strong performance in Q4.</p>
+
+                        <h4 class="text-lg font-semibold mb-2">Market Analysis</h4>
+                        <p class="mb-4">Market share analysis indicates competitive positioning within the industry sector.</p>
+                    </div>
+
+                    <div x-show="previewMode === 'after'" class="slide-in">
+                        <h3 class="text-xl font-bold mb-4">Executive Summary</h3>
+                        <p class="mb-4">Our company has experienced significant growth over the past fiscal year. The financial performance demonstrates strong market position and operational efficiency.</p>
+
+                        <h4 class="text-lg font-semibold mb-2">Revenue Performance</h4>
+                        <div class="highlight-change">
+                            <p class="mb-2">Total revenue increased by <strong>18% year-over-year</strong>, driven by strong performance across all business units. <span class="source-reference">[Page 3]</span></p>
+                            <p class="mb-4">Quarterly breakdown: Q1: $2.5M, Q2: $3.1M, Q3: $2.9M, Q4: $3.8M <span class="source-reference">[Page 15]</span></p>
+                        </div>
+
+                        <h4 class="text-lg font-semibold mb-2">Market Analysis</h4>
+                        <div class="highlight-change">
+                            <p class="mb-4">Company holds <strong>23.5% market share</strong>, up from 19.2% previous year, positioning us as a market leader in the sector. <span class="source-reference">[Page 42]</span></p>
+                        </div>
+                    </div>
+
+                    <div x-show="previewMode === 'changes'" class="slide-in">
+                        <h4 class="text-lg font-semibold mb-4 text-green-600">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Changes Summary
+                        </h4>
+
+                        <div class="space-y-4">
+                            <div class="highlight-change">
+                                <p class="font-medium">Added: Revenue Performance Data</p>
+                                <p class="text-sm">Total revenue increased by 18% year-over-year... <span class="source-reference">[Page 3]</span></p>
+                            </div>
+
+                            <div class="highlight-change">
+                                <p class="font-medium">Added: Quarterly Revenue Breakdown</p>
+                                <p class="text-sm">Q1: $2.5M, Q2: $3.1M, Q3: $2.9M, Q4: $3.8M <span class="source-reference">[Page 15]</span></p>
+                            </div>
+
+                            <div class="highlight-change">
+                                <p class="font-medium">Added: Market Share Analysis</p>
+                                <p class="text-sm">Company holds 23.5% market share, up from 19.2%... <span class="source-reference">[Page 42]</span></p>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 p-4 bg-green-50 rounded-lg">
+                            <h5 class="font-semibold text-green-800 mb-2">Update Statistics</h5>
+                            <div class="grid md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium">Total Changes:</span> 24
+                                </div>
+                                <div>
+                                    <span class="font-medium">Pages Updated:</span> 8
+                                </div>
+                                <div>
+                                    <span class="font-medium">References Added:</span> 15
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Actions -->
+                <div class="flex justify-center space-x-4 mt-8">
+                    <button @click="activeView = 'automation'" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-cogs mr-2"></i>
+                        View AI Engine
+                    </button>
+                    <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Download Updated Document
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Automation Engine View -->
+        <div x-show="activeView === 'automation'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-cogs mr-3 text-indigo-600"></i>
+                    AI Automation Engine
+                    <span class="ml-auto text-sm font-normal text-gray-500">Processing Pipeline</span>
+                </h2>
+
+                <!-- Processing Pipeline -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Document Processing Pipeline</h3>
+                    <div class="flex items-center justify-between overflow-x-auto pb-4 space-x-6">
+                        <!-- PDF Analysis -->
+                        <div class="ai-node min-w-0 flex-1">
+                            <i class="fas fa-file-pdf text-2xl mb-2"></i>
+                            <div class="font-semibold">PDF Analysis</div>
+                            <div class="text-sm opacity-90">OCR + Structure Detection</div>
+                        </div>
+
+                        <div class="text-2xl text-purple-500 data-flow">→</div>
+
+                        <!-- Data Extraction -->
+                        <div class="ai-node min-w-0 flex-1">
+                            <i class="fas fa-brain text-2xl mb-2"></i>
+                            <div class="font-semibold">AI Extraction</div>
+                            <div class="text-sm opacity-90">NLP + Computer Vision</div>
+                        </div>
+
+                        <div class="text-2xl text-purple-500 data-flow">→</div>
+
+                        <!-- Content Matching -->
+                        <div class="ai-node min-w-0 flex-1">
+                            <i class="fas fa-search text-2xl mb-2"></i>
+                            <div class="font-semibold">Content Matching</div>
+                            <div class="text-sm opacity-90">Semantic Similarity</div>
+                        </div>
+
+                        <div class="text-2xl text-purple-500 data-flow">→</div>
+
+                        <!-- Document Update -->
+                        <div class="ai-node min-w-0 flex-1">
+                            <i class="fas fa-file-word text-2xl mb-2"></i>
+                            <div class="font-semibold">Document Update</div>
+                            <div class="text-sm opacity-90">Intelligent Insertion</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Components -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-eye text-red-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Computer Vision</h4>
+                                <p class="text-sm text-gray-600">Chart & table detection</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Accuracy:</span>
+                                <span class="font-medium">96.5%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 96.5%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-language text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">NLP Processing</h4>
+                                <p class="text-sm text-gray-600">Text understanding</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Accuracy:</span>
+                                <span class="font-medium">94.2%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 94.2%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Content Mapping</h4>
+                                <p class="text-sm text-gray-600">Semantic matching</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Accuracy:</span>
+                                <span class="font-medium">91.8%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 91.8%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-magic text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Auto-Referencing</h4>
+                                <p class="text-sm text-gray-600">Source page tracking</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Accuracy:</span>
+                                <span class="font-medium">99.1%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 99.1%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-shield-alt text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Quality Control</h4>
+                                <p class="text-sm text-gray-600">Validation & verification</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Accuracy:</span>
+                                <span class="font-medium">97.3%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 97.3%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-rocket text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Performance</h4>
+                                <p class="text-sm text-gray-600">Speed & efficiency</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Pages/min:</span>
+                                <span class="font-medium">24</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Specs -->
+                <div class="bg-gray-50 p-6 rounded-lg mt-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Technical Specifications</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium text-gray-700 mb-3">Supported Formats</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• PDF documents (up to 500 pages)</li>
+                                <li>• Word documents (.docx, .doc)</li>
+                                <li>• Tables, charts, and images</li>
+                                <li>• Multi-column layouts</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-700 mb-3">AI Models Used</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>• GPT-4 for text analysis</li>
+                                <li>• Custom vision models for charts</li>
+                                <li>• BERT for semantic matching</li>
+                                <li>• OCR engines for text extraction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function documentAutomation() {
+            return {
+                // UI State
+                activeView: 'upload',
+                darkMode: localStorage.getItem('darkMode') === 'true' || false,
+                processingStatus: 'idle', // idle, processing, complete
+                toastMessage: '',
+                toastIcon: '',
+                isDragging: false,
+
+                // File State
+                pdfFile: { name: '', size: '' },
+                wordFile: { name: '', size: '' },
+
+                // Preview State
+                previewMode: 'before', // before, after, changes
+
+                // Extracted Data
+                extractedData: [],
+                mappings: [],
+
+                // Initialize
+                init() {
+                    this.loadSampleData();
+                    this.showToast('Document automation tool loaded!', 'fas fa-check-circle text-green-500');
+                },
+
+                // Theme Management
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                    this.showToast(`Switched to ${this.darkMode ? 'dark' : 'light'} theme`, 'fas fa-palette text-purple-500');
+                },
+
+                // File Upload Handlers
+                uploadPdf() {
+                    // Simulate file upload
+                    this.pdfFile = {
+                        name: 'Annual_Report_2024.pdf',
+                        size: '12.5 MB'
+                    };
+                    this.showToast('PDF uploaded successfully!', 'fas fa-file-pdf text-red-500');
+                },
+
+                uploadWord() {
+                    // Simulate file upload
+                    this.wordFile = {
+                        name: 'Company_Report_Template.docx',
+                        size: '8.2 MB'
+                    };
+                    this.showToast('Word document uploaded successfully!', 'fas fa-file-word text-blue-500');
+                },
+
+                handlePdfDrop(e) {
+                    this.isDragging = false;
+                    this.uploadPdf();
+                },
+
+                handleWordDrop(e) {
+                    this.isDragging = false;
+                    this.uploadWord();
+                },
+
+                // Processing
+                startProcessing() {
+                    this.processingStatus = 'processing';
+                    this.showToast('Starting AI analysis...', 'fas fa-cogs text-purple-500');
+
+                    // Simulate processing time
+                    setTimeout(() => {
+                        this.processingStatus = 'complete';
+                        this.activeView = 'analysis';
+                        this.showToast('Analysis complete!', 'fas fa-check text-green-500');
+                    }, 3000);
+                },
+
+                // Load Sample Data
+                loadSampleData() {
+                    this.extractedData = [
+                        {
+                            id: 1,
+                            type: 'table',
+                            title: 'Revenue Breakdown by Quarter',
+                            content: 'Q1: $2.5M, Q2: $3.1M, Q3: $2.9M, Q4: $3.8M',
+                            page: 15,
+                            confidence: 96.5
+                        },
+                        {
+                            id: 2,
+                            type: 'text',
+                            title: 'Executive Summary',
+                            content: 'Total revenue increased by 18% year-over-year, driven by strong performance...',
+                            page: 3,
+                            confidence: 94.2
+                        },
+                        {
+                            id: 3,
+                            type: 'chart',
+                            title: 'Market Share Analysis',
+                            content: 'Company holds 23.5% market share, up from 19.2% previous year',
+                            page: 42,
+                            confidence: 91.8
+                        }
+                    ];
+                },
+
+                // Toast Notifications
+                showToast(message, icon) {
+                    this.toastMessage = message;
+                    this.toastIcon = icon;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 4000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
