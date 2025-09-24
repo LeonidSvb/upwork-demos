@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HubSpot + Nexudus Integration Demo - Member Platform CRM Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --hubspot-color: #ff7a59;
+            --nexudus-color: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --hubspot-color: #ff8a6b;
+            --nexudus-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        * { transition: all 0.3s ease; }
+
+        /* Theme Variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+        .bg-gray-100 { background-color: var(--bg-primary) !important; }
+        .text-gray-800, .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-secondary) !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--border-color) !important; }
+
+        /* Custom Animations */
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes bounce-gentle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes sync-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .pulse-slow { animation: pulse-slow 3s infinite; }
+        .slide-in { animation: slide-in 0.5s ease-out; }
+        .bounce-gentle { animation: bounce-gentle 2s infinite; }
+        .sync-pulse { animation: sync-pulse 2s infinite; }
+
+        /* Integration Flow */
+        .integration-arrow {
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .integration-arrow::after {
+            content: '↔';
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: var(--success-color);
+            animation: sync-pulse 2s infinite;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--hubspot-color), var(--nexudus-color));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* Card Hover Effects */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Status Indicators */
+        .status-synced { color: var(--success-color); }
+        .status-syncing { color: var(--warning-color); }
+        .status-error { color: var(--error-color); }
+
+        /* Modal Blur */
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            animation: toast-in 0.3s ease-out forwards;
+        }
+
+        @keyframes toast-in {
+            to { transform: translateX(0); }
+        }
+
+        /* Workflow Builder */
+        .workflow-node {
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            min-width: 200px;
+            text-align: center;
+            position: relative;
+        }
+
+        .workflow-node.hubspot {
+            border-color: var(--hubspot-color);
+            background: linear-gradient(135deg, #fff5f3, #ffffff);
+        }
+
+        .workflow-node.nexudus {
+            border-color: var(--nexudus-color);
+            background: linear-gradient(135deg, #eff6ff, #ffffff);
+        }
+
+        .workflow-node.trigger {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, #ffffff);
+        }
+
+        /* Data Sync Animation */
+        .data-sync {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-sync::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+            animation: sync-wave 3s infinite;
+        }
+
+        @keyframes sync-wave {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Member Card Animation */
+        .member-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .member-card.syncing {
+            border-color: var(--warning-color);
+            background: linear-gradient(135deg, #fffbeb, var(--bg-secondary));
+        }
+
+        .member-card.synced {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, var(--bg-secondary));
+        }
+    </style>
+</head>
+<body x-data="hubspotDemo()" x-init="init()" :data-theme="darkMode ? 'dark' : 'light'" class="bg-gray-50 transition-colors duration-300">
+
+    <!-- Toast Notification -->
+    <div x-show="toastMessage" class="toast" x-transition>
+        <div class="flex items-center space-x-3">
+            <i :class="toastIcon" class="text-lg"></i>
+            <span x-text="toastMessage" class="text-gray-800"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-orange-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sync-alt text-white text-sm"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">HubSpot + Nexudus Integration</h1>
+                    </div>
+                    <div class="hidden md:flex space-x-1">
+                        <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">HubSpot CRM</span>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Nexudus Members</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Workflows</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Sync Status -->
+                    <div class="flex items-center space-x-2">
+                        <div :class="syncStatus === 'synced' ? 'bg-green-500' : 'bg-yellow-500'" class="w-3 h-3 rounded-full pulse-slow"></div>
+                        <span x-text="syncStatus === 'synced' ? 'Data Synced' : 'Syncing...'" class="text-sm text-gray-600"></span>
+                    </div>
+                    <!-- Theme Toggle -->
+                    <button @click="toggleTheme()" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <i :class="darkMode ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto">
+                <button @click="activeView = 'overview'" :class="activeView === 'overview' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-chart-pie mr-2"></i>Integration Overview
+                </button>
+                <button @click="activeView = 'workflow'" :class="activeView === 'workflow' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-project-diagram mr-2"></i>Workflow Builder
+                </button>
+                <button @click="activeView = 'sync'" :class="activeView === 'sync' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-sync mr-2"></i>Data Sync
+                </button>
+                <button @click="activeView = 'members'" :class="activeView === 'members' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-users mr-2"></i>Member Data
+                </button>
+                <button @click="activeView = 'analytics'" :class="activeView === 'analytics' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    <i class="fas fa-chart-line mr-2"></i>Analytics
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Integration Overview -->
+        <div x-show="activeView === 'overview'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie mr-3 text-orange-600"></i>
+                    Integration Architecture
+                    <span class="ml-auto text-sm font-normal text-gray-500">Nexudus ↔ HubSpot Sync</span>
+                </h2>
+
+                <!-- Integration Flow Diagram -->
+                <div class="bg-gradient-to-r from-orange-50 to-blue-50 p-6 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Flow Architecture</h3>
+                    <div class="flex items-center justify-center space-x-8 overflow-x-auto pb-4">
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-20 h-20 mx-auto bg-blue-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                                <i class="fas fa-building text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Nexudus</h4>
+                            <p class="text-sm text-gray-600">Member Platform</p>
+                            <div class="mt-2 text-xs text-gray-500">
+                                • Member profiles<br>
+                                • Billing data<br>
+                                • Space bookings
+                            </div>
+                        </div>
+
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">Real-time API</p>
+                            </div>
+                        </div>
+
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-20 h-20 mx-auto bg-green-500 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                                <i class="fas fa-cogs text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Middleware</h4>
+                            <p class="text-sm text-gray-600">Data Processing</p>
+                            <div class="mt-2 text-xs text-gray-500">
+                                • Field mapping<br>
+                                • Data transformation<br>
+                                • Error handling
+                            </div>
+                        </div>
+
+                        <div class="integration-arrow">
+                            <div class="text-center">
+                                <p class="text-xs text-gray-500">HubSpot API</p>
+                            </div>
+                        </div>
+
+                        <div class="text-center min-w-0 flex-1">
+                            <div class="w-20 h-20 mx-auto bg-orange-500 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                                <i class="fas fa-hubspot text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">HubSpot</h4>
+                            <p class="text-sm text-gray-600">CRM & Marketing</p>
+                            <div class="mt-2 text-xs text-gray-500">
+                                • Contact records<br>
+                                • Marketing automation<br>
+                                • Sales pipeline
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Integration Points -->
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="hover-card bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-user-plus text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Member Onboarding</h3>
+                                <p class="text-sm text-gray-600">Automatic HubSpot contact creation</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• New member → HubSpot contact</li>
+                            <li>• Membership tier mapping</li>
+                            <li>• Welcome email automation</li>
+                            <li>• Marketing list assignment</li>
+                        </ul>
+                    </div>
+
+                    <div class="hover-card bg-green-50 p-6 rounded-lg border border-green-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-sync-alt text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Data Synchronization</h3>
+                                <p class="text-sm text-gray-600">Bi-directional data flow</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Member profile updates</li>
+                            <li>• Billing status changes</li>
+                            <li>• Activity tracking</li>
+                            <li>• Custom field mapping</li>
+                        </ul>
+                    </div>
+
+                    <div class="hover-card bg-orange-50 p-6 rounded-lg border border-orange-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-envelope text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Communication Workflows</h3>
+                                <p class="text-sm text-gray-600">Automated marketing flows</p>
+                            </div>
+                        </div>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Membership renewal reminders</li>
+                            <li>• Event notifications</li>
+                            <li>• Engagement campaigns</li>
+                            <li>• Retention workflows</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Integration Stats -->
+                <div class="grid md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Total Members</p>
+                                <p x-text="memberStats.total" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-users text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Synced Today</p>
+                                <p x-text="memberStats.syncedToday" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-sync-alt text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Active Workflows</p>
+                                <p x-text="memberStats.activeWorkflows" class="text-2xl font-bold"></p>
+                            </div>
+                            <i class="fas fa-project-diagram text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-lg text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Sync Success</p>
+                                <p class="text-2xl font-bold">99.8%</p>
+                            </div>
+                            <i class="fas fa-check-circle text-2xl opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Integration Report -->
+                <div class="text-center mt-8">
+                    <button @click="downloadIntegrationReport()" class="bg-gradient-to-r from-orange-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-blue-700 transition-all transform hover:scale-105">
+                        <i class="fas fa-download mr-2"></i>
+                        Download Integration Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Builder View -->
+        <div x-show="activeView === 'workflow'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-project-diagram mr-3 text-blue-600"></i>
+                    HubSpot Workflow Builder
+                    <span class="ml-auto text-sm font-normal text-gray-500">Automated Member Flows</span>
+                </h2>
+
+                <!-- Sample Workflow -->
+                <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">New Member Onboarding Workflow</h3>
+                    <div class="flex items-center justify-between overflow-x-auto pb-4 space-x-4">
+                        <!-- Trigger -->
+                        <div class="workflow-node trigger">
+                            <div class="w-12 h-12 mx-auto bg-green-500 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-play text-white"></i>
+                            </div>
+                            <div class="font-semibold text-gray-800">Trigger</div>
+                            <div class="text-sm text-gray-600">New member in Nexudus</div>
+                        </div>
+
+                        <div class="text-2xl text-green-500">→</div>
+
+                        <!-- Create Contact -->
+                        <div class="workflow-node hubspot">
+                            <div class="w-12 h-12 mx-auto bg-orange-500 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-user-plus text-white"></i>
+                            </div>
+                            <div class="font-semibold text-gray-800">Create Contact</div>
+                            <div class="text-sm text-gray-600">Add to HubSpot CRM</div>
+                        </div>
+
+                        <div class="text-2xl text-orange-500">→</div>
+
+                        <!-- Send Welcome Email -->
+                        <div class="workflow-node hubspot">
+                            <div class="w-12 h-12 mx-auto bg-orange-500 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div class="font-semibold text-gray-800">Welcome Email</div>
+                            <div class="text-sm text-gray-600">Personalized greeting</div>
+                        </div>
+
+                        <div class="text-2xl text-orange-500">→</div>
+
+                        <!-- Add to List -->
+                        <div class="workflow-node hubspot">
+                            <div class="w-12 h-12 mx-auto bg-orange-500 rounded-lg flex items-center justify-center mb-2">
+                                <i class="fas fa-list text-white"></i>
+                            </div>
+                            <div class="font-semibold text-gray-800">Add to List</div>
+                            <div class="text-sm text-gray-600">Membership tier list</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workflow Templates -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user-check text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Member Onboarding</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Welcome new members with personalized email sequences and resource sharing.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• Welcome email series</div>
+                            <div>• Resource downloads</div>
+                            <div>• Community introduction</div>
+                        </div>
+                        <button class="mt-4 w-full bg-blue-100 text-blue-800 py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-credit-card text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Renewal Reminders</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Automated email sequences for membership renewals based on Nexudus billing data.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• 30-day reminder</div>
+                            <div>• 7-day urgent notice</div>
+                            <div>• Post-expiry re-engagement</div>
+                        </div>
+                        <button class="mt-4 w-full bg-yellow-100 text-yellow-800 py-2 px-4 rounded-lg hover:bg-yellow-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-heart text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Engagement Campaigns</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Re-engage inactive members with targeted content and special offers.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• Activity monitoring</div>
+                            <div>• Personalized content</div>
+                            <div>• Special promotions</div>
+                        </div>
+                        <button class="mt-4 w-full bg-purple-100 text-purple-800 py-2 px-4 rounded-lg hover:bg-purple-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Event Notifications</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Notify members about upcoming events and space availability from Nexudus.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• Event announcements</div>
+                            <div>• Booking reminders</div>
+                            <div>• Capacity updates</div>
+                        </div>
+                        <button class="mt-4 w-full bg-green-100 text-green-800 py-2 px-4 rounded-lg hover:bg-green-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Usage Analytics</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Track member engagement and send personalized recommendations.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• Usage reports</div>
+                            <div>• Recommendation engine</div>
+                            <div>• Tier upgrade suggestions</div>
+                        </div>
+                        <button class="mt-4 w-full bg-red-100 text-red-800 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+
+                    <div class="hover-card bg-white p-6 rounded-lg border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800">Community Building</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">Foster member connections and community engagement through targeted outreach.</p>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• Member introductions</div>
+                            <div>• Networking events</div>
+                            <div>• Interest-based groups</div>
+                        </div>
+                        <button class="mt-4 w-full bg-indigo-100 text-indigo-800 py-2 px-4 rounded-lg hover:bg-indigo-200 transition-colors">
+                            Configure Workflow
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Sync View -->
+        <div x-show="activeView === 'sync'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-sync mr-3 text-green-600"></i>
+                    Real-time Data Synchronization
+                    <span class="ml-auto text-sm font-normal text-gray-500">Nexudus ↔ HubSpot</span>
+                </h2>
+
+                <!-- Sync Status Dashboard -->
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="data-sync bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Sync Status</h3>
+                            <i class="fas fa-sync-alt text-2xl sync-pulse"></i>
+                        </div>
+                        <div class="text-3xl font-bold mb-2" x-text="syncStatus === 'synced' ? 'Active' : 'Processing'"></div>
+                        <div class="text-sm opacity-90">Last sync: Just now</div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Data Flow</h3>
+                            <i class="fas fa-exchange-alt text-2xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold mb-2">Bidirectional</div>
+                        <div class="text-sm opacity-90">Real-time updates</div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Success Rate</h3>
+                            <i class="fas fa-chart-line text-2xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold mb-2">99.8%</div>
+                        <div class="text-sm opacity-90">Last 30 days</div>
+                    </div>
+                </div>
+
+                <!-- Field Mapping -->
+                <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Field Mapping Configuration</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-medium text-blue-600 mb-3 flex items-center">
+                                <i class="fas fa-building mr-2"></i>Nexudus Fields
+                            </h4>
+                            <div class="space-y-2">
+                                <div class="p-3 bg-white rounded border text-sm">member.fullName</div>
+                                <div class="p-3 bg-white rounded border text-sm">member.email</div>
+                                <div class="p-3 bg-white rounded border text-sm">member.membershipPlan</div>
+                                <div class="p-3 bg-white rounded border text-sm">member.billingStatus</div>
+                                <div class="p-3 bg-white rounded border text-sm">member.joinDate</div>
+                                <div class="p-3 bg-white rounded border text-sm">member.lastAccessDate</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-orange-600 mb-3 flex items-center">
+                                <i class="fas fa-hubspot mr-2"></i>HubSpot Fields
+                            </h4>
+                            <div class="space-y-2">
+                                <div class="p-3 bg-white rounded border text-sm">contact.firstname + contact.lastname</div>
+                                <div class="p-3 bg-white rounded border text-sm">contact.email</div>
+                                <div class="p-3 bg-white rounded border text-sm">contact.membership_tier</div>
+                                <div class="p-3 bg-white rounded border text-sm">contact.billing_status</div>
+                                <div class="p-3 bg-white rounded border text-sm">contact.member_since</div>
+                                <div class="p-3 bg-white rounded border text-sm">contact.last_activity</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sync Activity Log -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Sync Activity</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-800">New member synchronized</div>
+                                <div class="text-sm text-gray-600">Sarah Johnson added to HubSpot CRM</div>
+                            </div>
+                            <div class="text-sm text-gray-500">2 min ago</div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <i class="fas fa-sync-alt text-blue-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-800">Membership tier updated</div>
+                                <div class="text-sm text-gray-600">Michael Chen upgraded to Premium</div>
+                            </div>
+                            <div class="text-sm text-gray-500">5 min ago</div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <i class="fas fa-credit-card text-yellow-500 text-xl"></i>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-800">Billing status changed</div>
+                                <div class="text-sm text-gray-600">Lisa Wong payment overdue</div>
+                            </div>
+                            <div class="text-sm text-gray-500">8 min ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Member Data View -->
+        <div x-show="activeView === 'members'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-users mr-3 text-purple-600"></i>
+                    Member Data Management
+                    <span class="ml-auto text-sm font-normal text-gray-500">HubSpot CRM Integration</span>
+                </h2>
+
+                <!-- Sample Member Cards -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="member in members" :key="member.id">
+                        <div :class="member.syncStatus === 'synced' ? 'member-card synced' : member.syncStatus === 'syncing' ? 'member-card syncing' : 'member-card'">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                        <span x-text="member.name.charAt(0)" class="text-white font-bold"></span>
+                                    </div>
+                                    <div>
+                                        <h3 x-text="member.name" class="font-semibold text-gray-800"></h3>
+                                        <p x-text="member.email" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                                <div :class="member.syncStatus === 'synced' ? 'status-synced' : member.syncStatus === 'syncing' ? 'status-syncing' : 'status-error'">
+                                    <i :class="member.syncStatus === 'synced' ? 'fas fa-check-circle' : member.syncStatus === 'syncing' ? 'fas fa-sync-alt spin' : 'fas fa-exclamation-circle'"></i>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Membership:</span>
+                                    <span x-text="member.membership" :class="member.membership === 'Premium' ? 'text-yellow-600 font-semibold' : 'text-gray-800'"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span x-text="member.status" :class="member.status === 'Active' ? 'text-green-600' : 'text-red-600'" class="font-medium"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Joined:</span>
+                                    <span x-text="member.joinDate" class="text-gray-800"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Last Sync:</span>
+                                    <span class="text-xs text-gray-500">Just now</span>
+                                </div>
+                            </div>
+
+                            <button class="w-full mt-4 bg-purple-100 text-purple-800 py-2 px-4 rounded-lg hover:bg-purple-200 transition-colors">
+                                View in HubSpot
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div x-show="activeView === 'analytics'" class="space-y-6">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-indigo-600"></i>
+                    Integration Analytics
+                    <span class="ml-auto text-sm font-normal text-gray-500">Performance Metrics</span>
+                </h2>
+
+                <!-- Key Metrics -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Total Syncs</h3>
+                            <i class="fas fa-sync text-2xl opacity-75"></i>
+                        </div>
+                        <div class="text-3xl font-bold">12,457</div>
+                        <div class="text-sm opacity-90">+15% this month</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Success Rate</h3>
+                            <i class="fas fa-check-circle text-2xl opacity-75"></i>
+                        </div>
+                        <div class="text-3xl font-bold">99.8%</div>
+                        <div class="text-sm opacity-90">Excellent performance</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Avg Sync Time</h3>
+                            <i class="fas fa-clock text-2xl opacity-75"></i>
+                        </div>
+                        <div class="text-3xl font-bold">1.2s</div>
+                        <div class="text-sm opacity-90">Lightning fast</div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-lg text-white">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold">Data Points</h3>
+                            <i class="fas fa-database text-2xl opacity-75"></i>
+                        </div>
+                        <div class="text-3xl font-bold">24,891</div>
+                        <div class="text-sm opacity-90">Fields synchronized</div>
+                    </div>
+                </div>
+
+                <!-- Benefits Summary -->
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Integration Benefits</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">Automated Member Onboarding</div>
+                                    <div class="text-sm text-gray-600">85% faster than manual processes</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-up text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">Improved Member Retention</div>
+                                    <div class="text-sm text-gray-600">23% increase through better communication</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-envelope text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">Marketing Automation</div>
+                                    <div class="text-sm text-gray-600">Personalized campaigns based on member data</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">Time Savings</div>
+                                    <div class="text-sm text-gray-600">5+ hours saved per week on data management</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function hubspotDemo() {
+            return {
+                // UI State
+                activeView: 'overview',
+                darkMode: localStorage.getItem('darkMode') === 'true' || false,
+                syncStatus: 'synced',
+                toastMessage: '',
+                toastIcon: '',
+
+                // Demo State
+                memberStats: {
+                    total: 0,
+                    syncedToday: 0,
+                    activeWorkflows: 0
+                },
+
+                // Sample member data
+                members: [
+                    {
+                        id: 1,
+                        name: 'Sarah Johnson',
+                        email: 'sarah@company.com',
+                        membership: 'Premium',
+                        status: 'Active',
+                        joinDate: '2024-01-15',
+                        lastSync: '2024-01-20T10:30:00Z',
+                        syncStatus: 'synced'
+                    },
+                    {
+                        id: 2,
+                        name: 'Michael Chen',
+                        email: 'michael@startup.com',
+                        membership: 'Standard',
+                        status: 'Active',
+                        joinDate: '2024-01-10',
+                        lastSync: '2024-01-20T10:25:00Z',
+                        syncStatus: 'syncing'
+                    }
+                ],
+
+                // Initialize
+                init() {
+                    this.loadMemberStats();
+                    this.startRealtimeUpdates();
+                    this.showToast('HubSpot integration demo loaded!', 'fas fa-check-circle text-green-500');
+                },
+
+                // Theme Management
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    localStorage.setItem('darkMode', this.darkMode);
+                    this.showToast(`Switched to ${this.darkMode ? 'dark' : 'light'} theme`, 'fas fa-palette text-purple-500');
+                },
+
+                // Load Member Stats
+                loadMemberStats() {
+                    this.memberStats = {
+                        total: Math.floor(Math.random() * 500) + 150,
+                        syncedToday: Math.floor(Math.random() * 50) + 20,
+                        activeWorkflows: Math.floor(Math.random() * 10) + 5
+                    };
+
+                    // Animate counters
+                    this.animateCounters();
+                },
+
+                // Animate Counter Numbers
+                animateCounters() {
+                    const stats = ['total', 'syncedToday', 'activeWorkflows'];
+                    stats.forEach(stat => {
+                        const target = this.memberStats[stat];
+                        let current = 0;
+                        const increment = target / 30;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+                            this.memberStats[stat] = Math.floor(current);
+                        }, 50);
+                    });
+                },
+
+                // Real-time Updates
+                startRealtimeUpdates() {
+                    setInterval(() => {
+                        // Simulate sync status changes
+                        if (Math.random() > 0.9) {
+                            this.syncStatus = this.syncStatus === 'synced' ? 'syncing' : 'synced';
+                            if (this.syncStatus === 'synced') {
+                                this.showToast('Data sync completed!', 'fas fa-check-circle text-green-500');
+                            }
+                        }
+                    }, 5000);
+                },
+
+                // Download Reports
+                downloadIntegrationReport() {
+                    try {
+                        const { jsPDF } = window.jsPDF;
+                        const doc = new jsPDF();
+
+                        // Header
+                        doc.setFontSize(20);
+                        doc.setTextColor(255, 122, 89);
+                        doc.text('HubSpot + Nexudus Integration', 20, 30);
+                        doc.text('Technical Implementation Report', 20, 45);
+
+                        // Separator line
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(20, 55, 190, 55);
+
+                        // Integration Overview
+                        doc.setFontSize(14);
+                        doc.setTextColor(0, 0, 0);
+                        doc.text('Integration Overview', 20, 70);
+
+                        doc.setFontSize(10);
+                        doc.text('• Nexudus member platform data sync with HubSpot CRM', 20, 80);
+                        doc.text('• Real-time bi-directional data synchronization', 20, 90);
+                        doc.text('• Automated workflow triggers and member onboarding', 20, 100);
+                        doc.text('• Custom field mapping for membership tiers and billing', 20, 110);
+
+                        // Technical Architecture
+                        doc.setFontSize(14);
+                        doc.text('Technical Architecture', 20, 130);
+                        doc.setFontSize(10);
+                        doc.text('1. Nexudus API → Member data extraction', 20, 140);
+                        doc.text('2. Middleware → Data transformation & mapping', 20, 150);
+                        doc.text('3. HubSpot API → Contact creation & updates', 20, 160);
+                        doc.text('4. Workflow automation → Marketing & communication', 20, 170);
+
+                        // Key Benefits
+                        doc.setFontSize(14);
+                        doc.text('Key Benefits', 20, 190);
+                        doc.setFontSize(10);
+                        doc.text('✓ Automated member onboarding in HubSpot', 20, 200);
+                        doc.text('✓ Unified member communication workflows', 20, 210);
+                        doc.text('✓ Real-time membership status updates', 20, 220);
+                        doc.text('✓ Enhanced member retention campaigns', 20, 230);
+                        doc.text('✓ Comprehensive member analytics', 20, 240);
+
+                        // Current Stats
+                        doc.setFontSize(12);
+                        doc.text('Current Integration Stats', 20, 260);
+                        doc.setFontSize(10);
+                        doc.text(`Total Members: ${this.memberStats.total}`, 20, 270);
+                        doc.text(`Synced Today: ${this.memberStats.syncedToday}`, 80, 270);
+                        doc.text(`Active Workflows: ${this.memberStats.activeWorkflows}`, 140, 270);
+
+                        doc.save('HubSpot-Nexudus-Integration-Report.pdf');
+                        this.showToast('Integration report downloaded!', 'fas fa-file-pdf text-red-500');
+                    } catch (error) {
+                        this.showToast('Error generating PDF', 'fas fa-exclamation-triangle text-red-500');
+                    }
+                },
+
+                // Toast Notifications
+                showToast(message, icon) {
+                    this.toastMessage = message;
+                    this.toastIcon = icon;
+                    setTimeout(() => {
+                        this.toastMessage = '';
+                    }, 4000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
