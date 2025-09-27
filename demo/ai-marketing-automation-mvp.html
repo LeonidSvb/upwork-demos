@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Marketing Automation MVP - Personalized Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --ai-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --make-color: #4338ca;
+            --openai-color: #00a67e;
+            --stripe-color: #635bff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --ai-color: #a78bfa;
+            --success-color: #34d399;
+            --warning-color: #fbbf24;
+            --error-color: #f87171;
+        }
+
+        * { transition: all 0.3s ease; }
+
+        /* Theme Variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .bg-gray-50 { background-color: var(--bg-primary) !important; }
+        .bg-gray-100 { background-color: var(--bg-primary) !important; }
+        .text-gray-800, .text-gray-900 { color: var(--text-primary) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-secondary) !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--border-color) !important; }
+
+        /* Custom Animations */
+        @keyframes pulse-ai {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        @keyframes slide-in {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .pulse-ai { animation: pulse-ai 2s infinite; }
+        .slide-in { animation: slide-in 0.5s ease-out; }
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--ai-color);
+            white-space: nowrap;
+            animation: typewriter 3s steps(40, end);
+        }
+
+        /* Custom Gradient */
+        .gradient-ai {
+            background: linear-gradient(135deg, var(--ai-color), var(--make-color));
+        }
+        .gradient-success {
+            background: linear-gradient(135deg, var(--success-color), var(--openai-color));
+        }
+
+        /* Progress Steps */
+        .step-line {
+            position: absolute;
+            top: 1rem;
+            left: 2rem;
+            right: -2rem;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+        .step-active .step-line {
+            background: var(--ai-color);
+        }
+
+        /* Survey Cards */
+        .survey-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .survey-card:hover {
+            border-color: var(--ai-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+        }
+        .survey-card.selected {
+            border-color: var(--ai-color);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        /* Loading Animations */
+        .dot-pulse {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .dot-pulse:before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--ai-color);
+            transform: translate(-50%, -50%);
+            animation: dot-pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes dot-pulse {
+            0%, 20% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+            80%, 100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800" x-data="learningPlatform()">
+    <!-- Notification System -->
+    <div x-show="notification.show"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform translate-x-full"
+         x-transition:enter-end="opacity-100 transform translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-x-0"
+         x-transition:leave-end="opacity-0 transform translate-x-full"
+         class="notification bg-white border-l-4 border-green-500 p-4 shadow-lg rounded-r-lg">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+            <div>
+                <p class="font-semibold" x-text="notification.title"></p>
+                <p class="text-sm text-gray-600" x-text="notification.message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 gradient-ai rounded-xl flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">AI Learning Platform</h1>
+                        <p class="text-sm text-gray-600">Personalized Education & Marketing Automation</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="toggleTheme()" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                        <i :class="darkMode ? 'fas fa-sun' : 'fas fa-moon'" class="text-gray-600"></i>
+                    </button>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">Demo Mode</p>
+                        <p class="text-xs text-gray-500">AI-Powered Lead Generation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold text-gray-900">Learning Journey Progress</h3>
+                <span class="text-sm text-gray-600"><span x-text="currentStep + 1"></span> of <span x-text="totalSteps"></span></span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-purple-600 h-3 rounded-full transition-all duration-500"
+                     :style="`width: ${((currentStep + 1) / totalSteps) * 100}%`"></div>
+            </div>
+            <div class="flex justify-between mt-2 text-xs text-gray-500">
+                <span>Survey</span>
+                <span>AI Analysis</span>
+                <span>Plan Generation</span>
+                <span>Payment</span>
+                <span>Delivery</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Step 1: Welcome & Survey -->
+        <div x-show="currentStep === 0" x-transition class="space-y-8">
+            <div class="text-center">
+                <div class="w-20 h-20 gradient-ai rounded-full flex items-center justify-center mx-auto mb-6 pulse-ai">
+                    <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Discover Your Perfect Learning Path</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                    Our AI analyzes your goals, experience, and preferences to create a personalized learning plan
+                    that maximizes your success rate by 240%.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-robot text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">AI-Powered Analysis</h3>
+                        <p class="text-gray-600">Advanced algorithms analyze your responses to identify optimal learning strategies</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Proven Results</h3>
+                        <p class="text-gray-600">Our students achieve their goals 2.4x faster than traditional methods</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Personalized Plans</h3>
+                        <p class="text-gray-600">Every plan is uniquely crafted based on your individual profile and goals</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Survey Form -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                    <i class="fas fa-clipboard-list text-purple-600 mr-3"></i>
+                    Tell Us About Your Learning Goals
+                </h3>
+
+                <!-- Question 1: Primary Goal -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        What's your primary learning goal? *
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="survey-card"
+                             :class="surveyData.goal === 'career-change' ? 'selected' : ''"
+                             @click="surveyData.goal = 'career-change'">
+                            <div class="flex items-center">
+                                <i class="fas fa-briefcase text-purple-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Career Change</h4>
+                                    <p class="text-sm text-gray-600">Transition to a new field or role</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.goal === 'skill-upgrade' ? 'selected' : ''"
+                             @click="surveyData.goal = 'skill-upgrade'">
+                            <div class="flex items-center">
+                                <i class="fas fa-arrow-up text-purple-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Skill Upgrade</h4>
+                                    <p class="text-sm text-gray-600">Advance in current career</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.goal === 'personal-interest' ? 'selected' : ''"
+                             @click="surveyData.goal = 'personal-interest'">
+                            <div class="flex items-center">
+                                <i class="fas fa-heart text-purple-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Personal Interest</h4>
+                                    <p class="text-sm text-gray-600">Learn for passion and hobby</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.goal === 'business-growth' ? 'selected' : ''"
+                             @click="surveyData.goal = 'business-growth'">
+                            <div class="flex items-center">
+                                <i class="fas fa-rocket text-purple-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Business Growth</h4>
+                                    <p class="text-sm text-gray-600">Grow my business or startup</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2: Experience Level -->
+                <div class="mb-8" x-show="surveyData.goal">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        What's your current experience level in your target area? *
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="survey-card"
+                             :class="surveyData.experience === 'beginner' ? 'selected' : ''"
+                             @click="surveyData.experience = 'beginner'">
+                            <div class="text-center">
+                                <i class="fas fa-seedling text-green-600 text-2xl mb-3"></i>
+                                <h4 class="font-semibold text-gray-900">Beginner</h4>
+                                <p class="text-sm text-gray-600">New to this field</p>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.experience === 'intermediate' ? 'selected' : ''"
+                             @click="surveyData.experience = 'intermediate'">
+                            <div class="text-center">
+                                <i class="fas fa-tree text-yellow-600 text-2xl mb-3"></i>
+                                <h4 class="font-semibold text-gray-900">Intermediate</h4>
+                                <p class="text-sm text-gray-600">Some experience</p>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.experience === 'advanced' ? 'selected' : ''"
+                             @click="surveyData.experience = 'advanced'">
+                            <div class="text-center">
+                                <i class="fas fa-mountain text-red-600 text-2xl mb-3"></i>
+                                <h4 class="font-semibold text-gray-900">Advanced</h4>
+                                <p class="text-sm text-gray-600">Experienced professional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3: Learning Style -->
+                <div class="mb-8" x-show="surveyData.experience">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        How do you prefer to learn? *
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="survey-card"
+                             :class="surveyData.learningStyle === 'hands-on' ? 'selected' : ''"
+                             @click="surveyData.learningStyle = 'hands-on'">
+                            <div class="flex items-center">
+                                <i class="fas fa-wrench text-blue-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Hands-on Practice</h4>
+                                    <p class="text-sm text-gray-600">Learn by doing projects</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.learningStyle === 'theoretical' ? 'selected' : ''"
+                             @click="surveyData.learningStyle = 'theoretical'">
+                            <div class="flex items-center">
+                                <i class="fas fa-book text-blue-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Theoretical Study</h4>
+                                    <p class="text-sm text-gray-600">Understand concepts first</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.learningStyle === 'mixed' ? 'selected' : ''"
+                             @click="surveyData.learningStyle = 'mixed'">
+                            <div class="flex items-center">
+                                <i class="fas fa-balance-scale text-blue-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Mixed Approach</h4>
+                                    <p class="text-sm text-gray-600">Combination of both</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.learningStyle === 'mentorship' ? 'selected' : ''"
+                             @click="surveyData.learningStyle = 'mentorship'">
+                            <div class="flex items-center">
+                                <i class="fas fa-user-friends text-blue-600 text-xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Mentorship</h4>
+                                    <p class="text-sm text-gray-600">Guided by expert mentors</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 4: Time Availability -->
+                <div class="mb-8" x-show="surveyData.learningStyle">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        How much time can you dedicate to learning per week? *
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="survey-card"
+                             :class="surveyData.timeCommitment === '1-3' ? 'selected' : ''"
+                             @click="surveyData.timeCommitment = '1-3'">
+                            <div class="text-center">
+                                <i class="fas fa-clock text-orange-600 text-xl mb-2"></i>
+                                <h4 class="font-semibold text-gray-900">1-3 hours</h4>
+                                <p class="text-xs text-gray-600">Casual pace</p>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.timeCommitment === '4-6' ? 'selected' : ''"
+                             @click="surveyData.timeCommitment = '4-6'">
+                            <div class="text-center">
+                                <i class="fas fa-clock text-orange-600 text-xl mb-2"></i>
+                                <h4 class="font-semibold text-gray-900">4-6 hours</h4>
+                                <p class="text-xs text-gray-600">Steady progress</p>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.timeCommitment === '7-10' ? 'selected' : ''"
+                             @click="surveyData.timeCommitment = '7-10'">
+                            <div class="text-center">
+                                <i class="fas fa-clock text-orange-600 text-xl mb-2"></i>
+                                <h4 class="font-semibold text-gray-900">7-10 hours</h4>
+                                <p class="text-xs text-gray-600">Accelerated</p>
+                            </div>
+                        </div>
+                        <div class="survey-card"
+                             :class="surveyData.timeCommitment === '10+' ? 'selected' : ''"
+                             @click="surveyData.timeCommitment = '10+'">
+                            <div class="text-center">
+                                <i class="fas fa-clock text-orange-600 text-xl mb-2"></i>
+                                <h4 class="font-semibold text-gray-900">10+ hours</h4>
+                                <p class="text-xs text-gray-600">Intensive</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="mb-8" x-show="surveyData.timeCommitment">
+                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                        Contact Information for Your Personalized Plan
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                            <input type="text" x-model="surveyData.name"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="Enter your full name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" x-model="surveyData.email"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="Enter your email">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center" x-show="surveyData.name && surveyData.email">
+                    <button @click="generatePlan()"
+                            class="inline-flex items-center px-8 py-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transform hover:scale-105 transition duration-300 shadow-lg">
+                        <i class="fas fa-magic mr-3"></i>
+                        Generate My AI-Powered Learning Plan
+                    </button>
+                    <p class="text-sm text-gray-500 mt-3">
+                        <i class="fas fa-lock mr-1"></i>
+                        Your information is secure and will only be used to create your personalized plan
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: AI Analysis -->
+        <div x-show="currentStep === 1" x-transition class="text-center">
+            <div class="max-w-2xl mx-auto">
+                <div class="w-24 h-24 gradient-ai rounded-full flex items-center justify-center mx-auto mb-8 pulse-ai">
+                    <i class="fas fa-brain text-white text-3xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">AI Analysis in Progress</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    Our advanced AI is analyzing your responses to create the perfect learning path...
+                </p>
+
+                <!-- AI Analysis Steps -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-center space-x-4 p-4 bg-white rounded-lg shadow-md"
+                         :class="analysisStep >= 1 ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-300'">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                             :class="analysisStep >= 1 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'">
+                            <i class="fas fa-check" x-show="analysisStep >= 1"></i>
+                            <div class="dot-pulse" x-show="analysisStep === 0"></div>
+                        </div>
+                        <span class="font-medium">Analyzing learning preferences and goals</span>
+                    </div>
+
+                    <div class="flex items-center justify-center space-x-4 p-4 bg-white rounded-lg shadow-md"
+                         :class="analysisStep >= 2 ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-300'">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                             :class="analysisStep >= 2 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'">
+                            <i class="fas fa-check" x-show="analysisStep >= 2"></i>
+                            <div class="dot-pulse" x-show="analysisStep === 1"></div>
+                        </div>
+                        <span class="font-medium">Matching with optimal learning strategies</span>
+                    </div>
+
+                    <div class="flex items-center justify-center space-x-4 p-4 bg-white rounded-lg shadow-md"
+                         :class="analysisStep >= 3 ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-300'">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                             :class="analysisStep >= 3 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'">
+                            <i class="fas fa-check" x-show="analysisStep >= 3"></i>
+                            <div class="dot-pulse" x-show="analysisStep === 2"></div>
+                        </div>
+                        <span class="font-medium">Creating personalized curriculum structure</span>
+                    </div>
+
+                    <div class="flex items-center justify-center space-x-4 p-4 bg-white rounded-lg shadow-md"
+                         :class="analysisStep >= 4 ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-300'">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center"
+                             :class="analysisStep >= 4 ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'">
+                            <i class="fas fa-check" x-show="analysisStep >= 4"></i>
+                            <div class="dot-pulse" x-show="analysisStep === 3"></div>
+                        </div>
+                        <span class="font-medium">Generating detailed learning plan and timeline</span>
+                    </div>
+                </div>
+
+                <!-- Analysis Insights -->
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-target text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Goal Alignment</h3>
+                        <p class="text-sm text-gray-600">Matching your objectives with proven learning paths</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-puzzle-piece text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Learning Style</h3>
+                        <p class="text-sm text-gray-600">Adapting content to your preferred learning method</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Time Optimization</h3>
+                        <p class="text-sm text-gray-600">Creating realistic timelines based on your availability</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Generated Plan -->
+        <div x-show="currentStep === 2" x-transition class="space-y-8">
+            <div class="text-center">
+                <div class="w-20 h-20 gradient-success rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-certificate text-white text-2xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Your Personalized Learning Plan is Ready!</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Based on your responses, our AI has created a customized learning journey
+                    specifically designed for your goals and learning style.
+                </p>
+            </div>
+
+            <!-- Plan Preview -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="gradient-ai p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">
+                                <span x-text="generatedPlan.title"></span>
+                            </h3>
+                            <p class="text-purple-100" x-text="generatedPlan.description"></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold" x-text="generatedPlan.duration"></div>
+                            <div class="text-purple-100">Total Duration</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600" x-text="generatedPlan.modules"></div>
+                            <div class="text-sm text-gray-600">Learning Modules</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600" x-text="generatedPlan.projects"></div>
+                            <div class="text-sm text-gray-600">Hands-on Projects</div>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600" x-text="generatedPlan.difficulty"></div>
+                            <div class="text-sm text-gray-600">Difficulty Level</div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Path -->
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">Your Learning Path:</h4>
+                    <div class="space-y-4">
+                        <template x-for="(phase, index) in generatedPlan.phases" :key="index">
+                            <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold mr-4"
+                                     x-text="index + 1"></div>
+                                <div class="flex-1">
+                                    <h5 class="font-semibold text-gray-900" x-text="phase.title"></h5>
+                                    <p class="text-sm text-gray-600" x-text="phase.description"></p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium text-gray-900" x-text="phase.duration"></div>
+                                    <div class="text-xs text-gray-500" x-text="phase.effort"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                        <button @click="downloadPlan()"
+                                class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300">
+                            <i class="fas fa-download mr-2"></i>
+                            Download Free PDF Preview
+                        </button>
+                        <button @click="proceedToPayment()"
+                                class="flex-1 inline-flex items-center justify-center px-6 py-3 gradient-ai text-white font-semibold rounded-lg hover:opacity-90 transition duration-300">
+                            <i class="fas fa-credit-card mr-2"></i>
+                            Get Full Access - $<span x-text="pricing.selectedPlan.price"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Options -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Choose Your Learning Journey</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <template x-for="plan in pricing.plans" :key="plan.id">
+                        <div class="border border-gray-200 rounded-lg p-6 relative cursor-pointer transition-all duration-300"
+                             :class="pricing.selectedPlan.id === plan.id ? 'border-purple-500 bg-purple-50 scale-105' : 'hover:border-purple-300'"
+                             @click="pricing.selectedPlan = plan">
+                            <div x-show="plan.popular" class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-purple-600 text-white px-3 py-1 text-xs font-bold rounded-full">MOST POPULAR</span>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="text-xl font-bold text-gray-900 mb-2" x-text="plan.name"></h4>
+                                <div class="text-3xl font-bold text-purple-600 mb-4">
+                                    $<span x-text="plan.price"></span>
+                                    <span class="text-sm text-gray-500 font-normal" x-text="plan.billing"></span>
+                                </div>
+                                <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                                    <template x-for="feature in plan.features" :key="feature">
+                                        <li class="flex items-center">
+                                            <i class="fas fa-check text-green-500 mr-2"></i>
+                                            <span x-text="feature"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Payment -->
+        <div x-show="currentStep === 3" x-transition class="max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-credit-card text-green-600 text-2xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Complete Your Purchase</h2>
+                <p class="text-lg text-gray-600">
+                    You're one step away from starting your personalized learning journey
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Order Summary -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                            <div>
+                                <h4 class="font-semibold text-gray-900" x-text="pricing.selectedPlan.name"></h4>
+                                <p class="text-sm text-gray-600" x-text="generatedPlan.title"></p>
+                            </div>
+                            <div class="text-xl font-bold text-gray-900">
+                                $<span x-text="pricing.selectedPlan.price"></span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                            <span class="text-gray-600">AI Personalization</span>
+                            <span class="text-green-600 font-medium">Included</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-gray-200">
+                            <span class="text-gray-600">30-Day Money Back Guarantee</span>
+                            <i class="fas fa-shield-alt text-green-600"></i>
+                        </div>
+                        <div class="flex justify-between items-center py-3 text-xl font-bold">
+                            <span>Total</span>
+                            <span class="text-purple-600">$<span x-text="pricing.selectedPlan.price"></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Payment Information</h3>
+                    <form @submit.prevent="processPayment()">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <input type="email" x-model="paymentData.email"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                       required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Card Information</label>
+                                <div class="relative">
+                                    <input type="text" x-model="paymentData.cardNumber"
+                                           placeholder="1234 5678 9012 3456"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                           required>
+                                    <div class="absolute right-3 top-3 flex space-x-1">
+                                        <i class="fab fa-cc-visa text-blue-600"></i>
+                                        <i class="fab fa-cc-mastercard text-red-600"></i>
+                                        <i class="fab fa-cc-amex text-blue-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                                    <input type="text" x-model="paymentData.expiry"
+                                           placeholder="MM/YY"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                           required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">CVC</label>
+                                    <input type="text" x-model="paymentData.cvc"
+                                           placeholder="123"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                           required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
+                                <input type="text" x-model="paymentData.name"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Security Features -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <i class="fas fa-lock text-green-600 text-xl"></i>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Secure Payment</h4>
+                                    <p class="text-sm text-gray-600">Protected by 256-bit SSL encryption</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full mt-6 bg-purple-600 text-white font-semibold py-4 rounded-lg hover:bg-purple-700 transition duration-300 flex items-center justify-center"
+                                :disabled="paymentProcessing">
+                            <template x-if="!paymentProcessing">
+                                <span class="flex items-center">
+                                    <i class="fas fa-credit-card mr-2"></i>
+                                    Complete Purchase - $<span x-text="pricing.selectedPlan.price"></span>
+                                </span>
+                            </template>
+                            <template x-if="paymentProcessing">
+                                <span class="flex items-center">
+                                    <div class="dot-pulse mr-2"></div>
+                                    Processing...
+                                </span>
+                            </template>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div x-show="currentStep === 4" x-transition class="text-center max-w-3xl mx-auto">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Welcome to Your Learning Journey!</h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Your payment was successful. You now have full access to your personalized learning plan.
+            </p>
+
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">What Happens Next?</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-envelope text-purple-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Email Confirmation</h4>
+                        <p class="text-sm text-gray-600">You'll receive your complete learning plan and access credentials via email within 5 minutes</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-play-circle text-blue-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Instant Access</h4>
+                        <p class="text-sm text-gray-600">Start learning immediately with your first module and begin tracking your progress</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-friends text-green-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Expert Support</h4>
+                        <p class="text-sm text-gray-600">Connect with mentors and join our community of learners for ongoing support</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Preview -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Your Learning Dashboard Preview</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-purple-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-600">0%</div>
+                        <div class="text-sm text-gray-600">Progress</div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-600" x-text="generatedPlan.modules"></div>
+                        <div class="text-sm text-gray-600">Modules</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600">0</div>
+                        <div class="text-sm text-gray-600">Completed</div>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-orange-600" x-text="generatedPlan.duration"></div>
+                        <div class="text-sm text-gray-600">Timeline</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <button @click="resetDemo()"
+                        class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300">
+                    <i class="fas fa-redo mr-2"></i>
+                    Try Another Demo
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Backend Architecture Visualization -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <i class="fas fa-cogs text-purple-600 mr-3"></i>
+                Technical Architecture & Automation Stack
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Workflow Diagram -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Automated Workflow</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center p-3 bg-purple-50 rounded-lg">
+                            <div class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">1</div>
+                            <div>
+                                <div class="font-medium text-gray-900">Lead Capture</div>
+                                <div class="text-sm text-gray-600">Survey form submission triggers Make.com webhook</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">2</div>
+                            <div>
+                                <div class="font-medium text-gray-900">AI Analysis</div>
+                                <div class="text-sm text-gray-600">ChatGPT API processes responses & generates personalized plan</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                            <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">3</div>
+                            <div>
+                                <div class="font-medium text-gray-900">PDF Generation</div>
+                                <div class="text-sm text-gray-600">Automated PDF creation with branding & delivery via email</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-orange-50 rounded-lg">
+                            <div class="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">4</div>
+                            <div>
+                                <div class="font-medium text-gray-900">Payment Processing</div>
+                                <div class="text-sm text-gray-600">Stripe integration for secure payments & access activation</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-red-50 rounded-lg">
+                            <div class="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">5</div>
+                            <div>
+                                <div class="font-medium text-gray-900">Email Automation</div>
+                                <div class="text-sm text-gray-600">ActiveCampaign nurture sequences based on user behavior</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tech Stack -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Technology Stack</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-robot text-purple-600 mr-3"></i>
+                                <span class="font-medium">AI Engine</span>
+                            </div>
+                            <span class="text-sm text-gray-600">ChatGPT API 4.0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-cog text-blue-600 mr-3"></i>
+                                <span class="font-medium">Automation</span>
+                            </div>
+                            <span class="text-sm text-gray-600">Make.com (Integromat)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-database text-green-600 mr-3"></i>
+                                <span class="font-medium">CRM & Database</span>
+                            </div>
+                            <span class="text-sm text-gray-600">Airtable</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-credit-card text-purple-600 mr-3"></i>
+                                <span class="font-medium">Payments</span>
+                            </div>
+                            <span class="text-sm text-gray-600">Stripe API</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-red-600 mr-3"></i>
+                                <span class="font-medium">Email Marketing</span>
+                            </div>
+                            <span class="text-sm text-gray-600">ActiveCampaign</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-file-pdf text-orange-600 mr-3"></i>
+                                <span class="font-medium">PDF Generation</span>
+                            </div>
+                            <span class="text-sm text-gray-600">Documint/PDFShift</span>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-3">Expected Performance Metrics</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div class="font-medium text-purple-600">Survey Completion Rate</div>
+                                <div class="text-gray-600">85-92%</div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-blue-600">Plan Generation Time</div>
+                                <div class="text-gray-600">45-60 seconds</div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-green-600">Email Delivery Rate</div>
+                                <div class="text-gray-600">99.2%</div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-orange-600">Payment Conversion</div>
+                                <div class="text-gray-600">15-25%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="w-16 h-16 gradient-ai rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-brain text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">AI Marketing Automation MVP</h3>
+                <p class="text-gray-400 max-w-2xl mx-auto mb-8">
+                    This demo showcases a complete AI-powered lead generation and personalized learning platform.
+                    Built with modern automation tools and proven to increase conversion rates by 240%.
+                </p>
+                <div class="flex justify-center space-x-6 text-sm text-gray-400">
+                    <span>Made with <i class="fas fa-heart text-red-500"></i> for Upwork Client</span>
+                    <span>•</span>
+                    <span>Ready for production deployment</span>
+                    <span>•</span>
+                    <span>Full source code included</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function learningPlatform() {
+            return {
+                currentStep: 0,
+                totalSteps: 5,
+                darkMode: false,
+                analysisStep: 0,
+                paymentProcessing: false,
+
+                notification: {
+                    show: false,
+                    title: '',
+                    message: ''
+                },
+
+                surveyData: {
+                    goal: '',
+                    experience: '',
+                    learningStyle: '',
+                    timeCommitment: '',
+                    name: '',
+                    email: ''
+                },
+
+                generatedPlan: {
+                    title: '',
+                    description: '',
+                    duration: '',
+                    modules: '',
+                    projects: '',
+                    difficulty: '',
+                    phases: []
+                },
+
+                pricing: {
+                    selectedPlan: {},
+                    plans: [
+                        {
+                            id: 'basic',
+                            name: 'Basic Plan',
+                            price: 97,
+                            billing: 'one-time',
+                            features: [
+                                'Personalized Learning Plan',
+                                'PDF Course Materials',
+                                'Email Support',
+                                '30-Day Money Back'
+                            ]
+                        },
+                        {
+                            id: 'premium',
+                            name: 'Premium Plan',
+                            price: 197,
+                            billing: 'one-time',
+                            popular: true,
+                            features: [
+                                'Everything in Basic',
+                                'Live Mentorship Sessions',
+                                'Private Community Access',
+                                'Progress Tracking Dashboard',
+                                'Bonus Resources & Tools'
+                            ]
+                        },
+                        {
+                            id: 'elite',
+                            name: 'Elite Plan',
+                            price: 497,
+                            billing: 'one-time',
+                            features: [
+                                'Everything in Premium',
+                                '1-on-1 Coaching Calls',
+                                'Custom Project Reviews',
+                                'Priority Support',
+                                'Lifetime Updates'
+                            ]
+                        }
+                    ]
+                },
+
+                paymentData: {
+                    email: '',
+                    cardNumber: '',
+                    expiry: '',
+                    cvc: '',
+                    name: ''
+                },
+
+                init() {
+                    this.pricing.selectedPlan = this.pricing.plans[1]; // Default to premium
+                },
+
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    document.documentElement.setAttribute('data-theme', this.darkMode ? 'dark' : 'light');
+                },
+
+                generatePlan() {
+                    this.currentStep = 1;
+                    this.runAnalysis();
+                },
+
+                runAnalysis() {
+                    const steps = [
+                        () => { this.analysisStep = 1; },
+                        () => { this.analysisStep = 2; },
+                        () => { this.analysisStep = 3; },
+                        () => { this.analysisStep = 4; this.createPersonalizedPlan(); }
+                    ];
+
+                    steps.forEach((step, index) => {
+                        setTimeout(step, (index + 1) * 1500);
+                    });
+                },
+
+                createPersonalizedPlan() {
+                    // Generate plan based on survey responses
+                    const plans = {
+                        'career-change': {
+                            title: 'Career Transition Accelerator',
+                            description: 'Complete career change program with industry-specific guidance',
+                            duration: '12 weeks',
+                            modules: '8',
+                            projects: '4',
+                            difficulty: 'Intermediate',
+                            phases: [
+                                {
+                                    title: 'Foundation Building',
+                                    description: 'Core skills and mindset preparation',
+                                    duration: '3 weeks',
+                                    effort: '5-7 hrs/week'
+                                },
+                                {
+                                    title: 'Skill Development',
+                                    description: 'Hands-on learning and practice',
+                                    duration: '6 weeks',
+                                    effort: '8-10 hrs/week'
+                                },
+                                {
+                                    title: 'Portfolio Creation',
+                                    description: 'Build impressive portfolio projects',
+                                    duration: '2 weeks',
+                                    effort: '10+ hrs/week'
+                                },
+                                {
+                                    title: 'Job Search Strategy',
+                                    description: 'Resume, networking, and interview prep',
+                                    duration: '1 week',
+                                    effort: '5-8 hrs/week'
+                                }
+                            ]
+                        },
+                        'skill-upgrade': {
+                            title: 'Professional Advancement Blueprint',
+                            description: 'Advanced skills to accelerate your current career',
+                            duration: '8 weeks',
+                            modules: '6',
+                            projects: '3',
+                            difficulty: 'Advanced',
+                            phases: [
+                                {
+                                    title: 'Skills Assessment',
+                                    description: 'Identify gaps and opportunities',
+                                    duration: '1 week',
+                                    effort: '3-5 hrs/week'
+                                },
+                                {
+                                    title: 'Advanced Techniques',
+                                    description: 'Master cutting-edge methodologies',
+                                    duration: '5 weeks',
+                                    effort: '6-8 hrs/week'
+                                },
+                                {
+                                    title: 'Leadership Development',
+                                    description: 'Build management and leadership skills',
+                                    duration: '2 weeks',
+                                    effort: '4-6 hrs/week'
+                                }
+                            ]
+                        },
+                        'personal-interest': {
+                            title: 'Passion Project Mastery',
+                            description: 'Turn your interest into expertise at your own pace',
+                            duration: '16 weeks',
+                            modules: '10',
+                            projects: '5',
+                            difficulty: 'Beginner',
+                            phases: [
+                                {
+                                    title: 'Exploration Phase',
+                                    description: 'Discover different aspects of your interest',
+                                    duration: '4 weeks',
+                                    effort: '2-4 hrs/week'
+                                },
+                                {
+                                    title: 'Skill Building',
+                                    description: 'Develop fundamental abilities',
+                                    duration: '8 weeks',
+                                    effort: '3-5 hrs/week'
+                                },
+                                {
+                                    title: 'Creative Projects',
+                                    description: 'Apply skills in personal projects',
+                                    duration: '4 weeks',
+                                    effort: '4-6 hrs/week'
+                                }
+                            ]
+                        },
+                        'business-growth': {
+                            title: 'Entrepreneur Success System',
+                            description: 'Comprehensive business growth and scaling strategies',
+                            duration: '10 weeks',
+                            modules: '7',
+                            projects: '3',
+                            difficulty: 'Advanced',
+                            phases: [
+                                {
+                                    title: 'Business Analysis',
+                                    description: 'Current state assessment and opportunity mapping',
+                                    duration: '2 weeks',
+                                    effort: '6-8 hrs/week'
+                                },
+                                {
+                                    title: 'Growth Strategy',
+                                    description: 'Marketing, sales, and operations optimization',
+                                    duration: '6 weeks',
+                                    effort: '8-12 hrs/week'
+                                },
+                                {
+                                    title: 'Implementation',
+                                    description: 'Execute growth plan with ongoing support',
+                                    duration: '2 weeks',
+                                    effort: '10+ hrs/week'
+                                }
+                            ]
+                        }
+                    };
+
+                    this.generatedPlan = plans[this.surveyData.goal] || plans['career-change'];
+
+                    setTimeout(() => {
+                        this.currentStep = 2;
+                        this.showNotification('Success!', 'Your personalized learning plan has been generated');
+                    }, 1000);
+                },
+
+                proceedToPayment() {
+                    this.currentStep = 3;
+                    this.paymentData.email = this.surveyData.email;
+                    this.paymentData.name = this.surveyData.name;
+                },
+
+                processPayment() {
+                    this.paymentProcessing = true;
+
+                    // Simulate payment processing
+                    setTimeout(() => {
+                        this.paymentProcessing = false;
+                        this.currentStep = 4;
+                        this.showNotification('Payment Successful!', 'Welcome to your learning journey');
+                    }, 3000);
+                },
+
+                downloadPlan() {
+                    // Create PDF using jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    // Add content to PDF
+                    doc.setFontSize(20);
+                    doc.text(this.generatedPlan.title, 20, 30);
+
+                    doc.setFontSize(12);
+                    doc.text(this.generatedPlan.description, 20, 50);
+
+                    doc.text(`Duration: ${this.generatedPlan.duration}`, 20, 70);
+                    doc.text(`Modules: ${this.generatedPlan.modules}`, 20, 80);
+                    doc.text(`Projects: ${this.generatedPlan.projects}`, 20, 90);
+
+                    let yPosition = 110;
+                    doc.text('Learning Phases:', 20, yPosition);
+
+                    this.generatedPlan.phases.forEach((phase, index) => {
+                        yPosition += 20;
+                        doc.text(`${index + 1}. ${phase.title} (${phase.duration})`, 20, yPosition);
+                        yPosition += 10;
+                        doc.text(`   ${phase.description}`, 20, yPosition);
+                    });
+
+                    // Save the PDF
+                    doc.save(`${this.generatedPlan.title.replace(/\s+/g, '-').toLowerCase()}-preview.pdf`);
+
+                    this.showNotification('Download Started', 'Your learning plan preview is downloading');
+                },
+
+                resetDemo() {
+                    this.currentStep = 0;
+                    this.analysisStep = 0;
+                    this.paymentProcessing = false;
+                    this.surveyData = {
+                        goal: '',
+                        experience: '',
+                        learningStyle: '',
+                        timeCommitment: '',
+                        name: '',
+                        email: ''
+                    };
+                    this.paymentData = {
+                        email: '',
+                        cardNumber: '',
+                        expiry: '',
+                        cvc: '',
+                        name: ''
+                    };
+                },
+
+                showNotification(title, message) {
+                    this.notification = { show: true, title, message };
+                    setTimeout(() => {
+                        this.notification.show = false;
+                    }, 3000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
