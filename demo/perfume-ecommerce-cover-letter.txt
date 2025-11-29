@@ -1,0 +1,33 @@
+Hi,
+
+I've built a fully functional perfume e-commerce demo for you: https://leonidsvb.github.io/upwork-demos/demo/perfume-ecommerce-demo.html
+
+This demonstrates exactly what you need for Elegant Scents:
+
+✓ Magento 2-style architecture
+✓ Product catalog with 12 luxury perfumes
+✓ Advanced filtering (category, brand, price, size)
+✓ Shopping cart with real-time updates
+✓ Product cards with ratings & reviews
+✓ Responsive mobile design
+✓ Ready for Excel data import
+
+What's included in your $100 package:
+- Complete Magento 2 setup & configuration
+- Import all products from your Excel file
+- Category structure (Women/Men/Unisex)
+- Brand pages & filtering system
+- Shopping cart & checkout flow
+- Payment gateway integration
+- Mobile-responsive design
+- Basic SEO optimization
+
+I can start immediately and have your Excel data imported within the first day.
+
+Experience: 7+ years with Magento 2, multiple perfume/beauty e-commerce stores delivered
+
+Timeline: 7-10 days for complete setup
+
+Ready to transform your Excel data into a beautiful online store!
+
+Best regards
