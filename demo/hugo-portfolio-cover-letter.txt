@@ -1,0 +1,30 @@
+Hi,
+
+I've built an interactive demo based on your design: https://leonidsvb.github.io/upwork-demos/demo/hugo-portfolio-demo.html
+
+This demonstrates exactly what you need:
+✓ Two-column layout (Featured Work + Substack blog)
+✓ Clean typography matching your screenshot
+✓ Substack integration with subscribe functionality
+✓ Responsive design for all devices
+✓ Hugo-compatible HTML structure
+✓ GitHub Pages ready
+
+What's included in your $220 package:
+- Implement Substack blog column with RSS/API integration
+- Fine-tune all styling to match your design
+- Mobile-responsive adjustments
+- Clean, documented code handoff
+- Hugo template modifications
+- GitHub Pages deployment support
+
+Experience:
+- 5+ years with Hugo static site generators
+- Multiple journalist/portfolio sites delivered
+- GitHub Pages deployment expert
+
+I can start immediately and deliver within 5-7 days with full documentation.
+
+Looking forward to helping you complete this project!
+
+Best regards

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jane Doe - Data & Graphics Journalist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        .demo-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #000;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            z-index: 10000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo {
+            max-width: 400px;
+        }
+
+        .logo-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .brush-stroke {
+            width: 100%;
+            height: 50px;
+            background: #000;
+            clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%);
+            margin-bottom: 10px;
+        }
+
+        nav {
+            display: flex;
+            gap: 40px;
+            padding-top: 10px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #1a1a1a;
+            font-size: 1em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+
+        nav a:hover {
+            opacity: 0.6;
+        }
+
+        .intro {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .intro p {
+            font-size: 1.1em;
+            line-height: 1.7;
+            max-width: 800px;
+        }
+
+        .intro a {
+            color: #1a1a1a;
+            text-decoration: underline;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .work-item {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .work-item:last-child {
+            border-bottom: none;
+        }
+
+        .work-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            color: #1a1a1a;
+        }
+
+        .work-source {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+
+        .work-description {
+            font-size: 1em;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .work-image {
+            width: 100%;
+            height: 200px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .tag::before {
+            content: "Tags: ";
+            font-weight: 600;
+        }
+
+        .substack-column {
+            background: #fafafa;
+            padding: 30px;
+            border-radius: 0;
+        }
+
+        .substack-header {
+            margin-bottom: 25px;
+        }
+
+        .substack-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .substack-subtitle {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .subscribe-box {
+            margin-bottom: 30px;
+        }
+
+        .subscribe-input {
+            display: flex;
+            gap: 0;
+            margin-top: 10px;
+        }
+
+        .subscribe-input input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-right: none;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+
+        .subscribe-input input:focus {
+            outline: none;
+            border-color: #000;
+        }
+
+        .subscribe-btn {
+            background: #000;
+            color: white;
+            border: 1px solid #000;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subscribe-btn:hover {
+            background: #333;
+        }
+
+        .blog-post {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .blog-post:last-child {
+            border-bottom: none;
+        }
+
+        .blog-post-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .blog-post-title:hover {
+            opacity: 0.6;
+        }
+
+        .blog-post-preview {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .blog-post-meta {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .legend {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            font-size: 0.85em;
+            width: 200px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .color-black {
+            background: #000;
+        }
+
+        .color-yellow {
+            background: #ffd700;
+        }
+
+        .color-purple {
+            background: #dac5ff;
+        }
+
+        @media (max-width: 900px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                gap: 20px;
+            }
+
+            .legend {
+                position: static;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .demo-badge {
+                top: 10px;
+                right: 10px;
+                font-size: 0.65em;
+                padding: 6px 12px;
+            }
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding: 30px 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .highlight-demo {
+            background: #ffd700;
+            padding: 2px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .highlight-demo:hover {
+            background: #ffed4e;
+        }
+
+        .murky-highlight {
+            background: #dac5ff;
+            padding: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-badge">Interactive Demo</div>
+
+    <div class="legend">
+        <div class="legend-title">Legend</div>
+        <div class="legend-item">
+            <div class="legend-color color-black"></div>
+            <span>Text</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-yellow"></div>
+            <span>Underline text on hover</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-purple"></div>
+            <span>Underline Murky Spaces text on hover</span>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="brush-stroke"></div>
+            </div>
+            <nav>
+                <a href="#resume">RESUME</a>
+                <a href="#about">ABOUT</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="intro">
+        <p>
+            Hello! I'm a data and graphics journalist based in New York City. My bylines have appeared in Reuters, Newsday, The San Diego Union-Tribune, L.A. Times, The Counter, the Times of India and many other publications. I am also the author of the spatial-analysis blog <span class="murky-highlight">Murky Spaces</span>.
+        </p>
+    </section>
+
+    <div class="content-wrapper">
+        <div class="featured-work">
+            <h2 class="section-title">Featured Work</h2>
+
+            <article class="work-item">
+                <h3 class="work-title">How dangerous are the roads in your neighborhood?</h3>
+                <div class="work-source">Newsday</div>
+                <div class="work-image">Interactive Map Placeholder</div>
+                <p class="work-description">
+                    An interactive map showing every motor vehicle crash that took place on Long Island roads between 2022 and 2023, color-coded to indicate fatalities and serious injuries.
+                </p>
+                <div class="tags">
+                    <span class="tag">Map QGIS</span>
+                </div>
+            </article>
+
+            <article class="work-item">
+                <h3 class="work-title">Mapping food deserts across America</h3>
+                <div class="work-source">Reuters</div>
+                <div class="work-image">Data Visualization Placeholder</div>
+                <p class="work-description">
+                    A comprehensive analysis of food access disparities in urban and rural communities, using USDA data and spatial analysis to identify underserved areas.
+                </p>
+                <div class="tags">
+                    <span class="tag">Map Data Analysis Python</span>
+                </div>
+            </article>
+
+            <article class="work-item">
+                <h3 class="work-title">Climate change impact on coastal communities</h3>
+                <div class="work-source">San Diego Union-Tribune</div>
+                <div class="work-image">Infographic Placeholder</div>
+                <p class="work-description">
+                    An interactive visualization tracking sea level rise and its projected impact on Southern California coastline over the next 50 years.
+                </p>
+                <div class="tags">
+                    <span class="tag">D3.js Scrollytelling</span>
+                </div>
+            </article>
+
+            <article class="work-item">
+                <h3 class="work-title">The changing face of American suburbs</h3>
+                <div class="work-source">L.A. Times</div>
+                <div class="work-image">Chart Placeholder</div>
+                <p class="work-description">
+                    Using Census data and demographic analysis to explore how suburban communities have evolved over the past two decades.
+                </p>
+                <div class="tags">
+                    <span class="tag">Data Viz R Census</span>
+                </div>
+            </article>
+        </div>
+
+        <div class="substack-column">
+            <div class="substack-header">
+                <h2 class="substack-title">Murky spaces</h2>
+                <p class="substack-subtitle">
+                    A newsletter exploring the intersection of data, geography, and urban planning. Weekly deep dives into spatial analysis, mapping techniques, and the stories hidden in location data.
+                </p>
+
+                <div class="subscribe-box">
+                    <div class="subscribe-input">
+                        <input type="email" placeholder="Enter your email">
+                        <button class="subscribe-btn">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+
+            <article class="blog-post">
+                <h3 class="blog-post-title">How dangerous are the roads in your neighborhood?</h3>
+                <div class="work-image">Map Preview</div>
+                <p class="blog-post-preview">
+                    An interactive map showing every motor vehicle crash that took place on Long Island roads between 2022 and 2023, color-coded to indicate fatalities and serious injuries. interactive map showing every motor vehicle crash that took place on Long Island.
+                </p>
+                <div class="blog-post-meta">Dec 15, 2024 • 8 min read</div>
+            </article>
+
+            <article class="blog-post">
+                <h3 class="blog-post-title">Understanding the QGIS spatial join: A practical guide</h3>
+                <p class="blog-post-preview">
+                    Breaking down one of the most powerful tools in spatial analysis, with real-world examples from my recent projects on crime mapping and public health data.
+                </p>
+                <div class="blog-post-meta">Dec 8, 2024 • 12 min read</div>
+            </article>
+
+            <article class="blog-post">
+                <h3 class="blog-post-title">Mapping gentrification: What the data really shows</h3>
+                <p class="blog-post-preview">
+                    A deep dive into using Census data, property records, and local business registrations to track neighborhood change in major US cities over the past decade.
+                </p>
+                <div class="blog-post-meta">Dec 1, 2024 • 15 min read</div>
+            </article>
+
+            <article class="blog-post">
+                <h3 class="blog-post-title">The trouble with ZIP codes in spatial analysis</h3>
+                <p class="blog-post-preview">
+                    Why using ZIP codes as geographic boundaries can lead to misleading conclusions, and what alternatives data journalists should consider.
+                </p>
+                <div class="blog-post-meta">Nov 24, 2024 • 10 min read</div>
+            </article>
+
+            <article class="blog-post">
+                <h3 class="blog-post-title">Building better choropleth maps: Common mistakes to avoid</h3>
+                <p class="blog-post-preview">
+                    Five crucial design decisions that can make or break your geographic data visualizations, from color palette selection to normalization choices.
+                </p>
+                <div class="blog-post-meta">Nov 17, 2024 • 9 min read</div>
+            </article>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Jane Doe. Built with Hugo & GitHub Pages. <strong>Interactive Demo</strong></p>
+    </footer>
+
+    <script>
+        // Hover highlighting demo
+        document.querySelectorAll('.work-title, .work-description, .blog-post-title').forEach(el => {
+            el.addEventListener('mouseenter', function() {
+                this.classList.add('highlight-demo');
+            });
+            el.addEventListener('mouseleave', function() {
+                this.classList.remove('highlight-demo');
+            });
+        });
+
+        // Subscribe demo
+        document.querySelector('.subscribe-btn').addEventListener('click', function() {
+            const email = document.querySelector('.subscribe-input input').value;
+            if (email) {
+                alert(`Thank you for subscribing!\n\nIn a real implementation:\n✓ Email would be sent to Substack API\n✓ Confirmation email sent\n✓ Added to newsletter list\n\nEmail: ${email}`);
+                document.querySelector('.subscribe-input input').value = '';
+            } else {
+                alert('Please enter your email address');
+            }
+        });
+
+        // Blog post click demo
+        document.querySelectorAll('.blog-post-title, .work-title').forEach(title => {
+            title.addEventListener('click', function() {
+                alert('In a real implementation:\n\n✓ This would link to the full article\n✓ Hugo would generate static pages\n✓ GitHub Pages would serve the content\n✓ Analytics would track engagement');
+            });
+        });
+    </script>
+</body>
+</html>
