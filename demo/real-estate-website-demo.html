@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premier Land & Properties - Texas Real Estate Investment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .demo-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            font-size: 0.9em;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .logo span {
+            color: #3498db;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%232c3e50" width="1200" height="600"/><text x="50%" y="50%" font-size="120" fill="%23ffffff" opacity="0.1" text-anchor="middle" dominant-baseline="middle" font-family="Arial">PREMIER PROPERTIES</text></svg>');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .search-box {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #555;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .section-header p {
+            font-size: 1.1em;
+            color: #777;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-stats {
+            text-align: center;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .property-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1em;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .property-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .property-badge.featured {
+            background: #f39c12;
+        }
+
+        .property-info {
+            padding: 25px;
+        }
+
+        .property-price {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .property-title {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .property-location {
+            color: #999;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .property-specs {
+            display: flex;
+            gap: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .spec {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 80px 20px;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            color: #333;
+        }
+
+        .contact-form h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .contact-form p {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .contact-form input,
+        .contact-form select,
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .contact-form input:focus,
+        .contact-form select:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer-section a:hover {
+            color: #3498db;
+        }
+
+        .copyright {
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .properties-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 60px 20px;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-badge">INTERACTIVE DEMO</div>
+
+    <header>
+        <nav>
+            <div class="logo">
+                Premier<span>Land</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#properties">Properties</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <h1>Find Your Perfect Land Investment</h1>
+        <p>Exclusive Texas Land & Property Deals for Investors</p>
+
+        <div class="search-box">
+            <form class="search-form" onsubmit="event.preventDefault(); searchProperties();">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="searchLocation" placeholder="City, County, or Zip Code">
+                </div>
+                <div class="form-group">
+                    <label>Property Type</label>
+                    <select id="searchType">
+                        <option value="">All Types</option>
+                        <option value="land">Land/Lots</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price Range</label>
+                    <select id="searchPrice">
+                        <option value="">Any Price</option>
+                        <option value="0-50000">Under $50k</option>
+                        <option value="50000-100000">$50k - $100k</option>
+                        <option value="100000-250000">$100k - $250k</option>
+                        <option value="250000+">$250k+</option>
+                    </select>
+                </div>
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">450+</div>
+                <div class="stat-label">Active Listings</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1,200+</div>
+                <div class="stat-label">Deals Closed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Client Satisfaction</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15</div>
+                <div class="stat-label">Years Experience</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container" id="properties">
+        <div class="section-header">
+            <h2>Featured Properties</h2>
+            <p>Hand-picked investment opportunities across Texas</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label>Filter by Type</label>
+                    <select id="filterType" onchange="filterProperties()">
+                        <option value="all">All Properties</option>
+                        <option value="land">Land/Lots</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sort by</label>
+                    <select id="sortBy" onchange="sortProperties()">
+                        <option value="featured">Featured First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="size">Size: Largest First</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Min. Acreage</label>
+                    <select id="filterAcreage" onchange="filterProperties()">
+                        <option value="0">Any Size</option>
+                        <option value="1">1+ Acres</option>
+                        <option value="5">5+ Acres</option>
+                        <option value="10">10+ Acres</option>
+                        <option value="20">20+ Acres</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="filterStatus" onchange="filterProperties()">
+                        <option value="all">All Status</option>
+                        <option value="new">New Listings</option>
+                        <option value="featured">Featured</option>
+                        <option value="reduced">Price Reduced</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-stats">
+                Showing <strong id="propertyCount">12</strong> properties
+            </div>
+        </div>
+
+        <div class="properties-grid" id="propertiesGrid">
+            <div class="property-card" data-type="land" data-price="89000" data-size="15" data-status="featured">
+                <div class="property-image" style="background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);">
+                    <span>15 Acres Agricultural Land</span>
+                    <div class="property-badge featured">FEATURED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$89,000</div>
+                    <div class="property-title">Prime Agricultural Land</div>
+                    <div class="property-location">📍 Lewisville, TX 75057</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 15 Acres</div>
+                        <div class="spec">🌾 Zoned AG</div>
+                        <div class="spec">💧 Water Access</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="125000" data-size="25" data-status="new">
+                <div class="property-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <span>25 Acres Development Land</span>
+                    <div class="property-badge">NEW LISTING</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$125,000</div>
+                    <div class="property-title">Development Opportunity</div>
+                    <div class="property-location">📍 Denton County, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 25 Acres</div>
+                        <div class="spec">🏗️ Subdividable</div>
+                        <div class="spec">🛣️ Road Frontage</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="residential" data-price="385000" data-size="0.5" data-status="featured">
+                <div class="property-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <span>3 Bed Investment Property</span>
+                    <div class="property-badge featured">FEATURED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$385,000</div>
+                    <div class="property-title">Turnkey Rental Property</div>
+                    <div class="property-location">📍 Flower Mound, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">🛏️ 3 Bed</div>
+                        <div class="spec">🛁 2 Bath</div>
+                        <div class="spec">📐 1,850 sqft</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="45000" data-size="8" data-status="reduced">
+                <div class="property-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <span>8 Acres Recreational Land</span>
+                    <div class="property-badge">PRICE REDUCED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$45,000</div>
+                    <div class="property-title">Recreational Acreage</div>
+                    <div class="property-location">📍 Collin County, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 8 Acres</div>
+                        <div class="spec">🌲 Wooded</div>
+                        <div class="spec">🦌 Hunting OK</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="commercial" data-price="650000" data-size="2" data-status="featured">
+                <div class="property-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <span>Commercial Investment</span>
+                    <div class="property-badge featured">FEATURED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$650,000</div>
+                    <div class="property-title">Mixed-Use Commercial</div>
+                    <div class="property-location">📍 Lewisville Main St, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">🏢 5,200 sqft</div>
+                        <div class="spec">💼 Tenanted</div>
+                        <div class="spec">📊 8.2% Cap Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="175000" data-size="30" data-status="new">
+                <div class="property-image" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                    <span>30 Acres Ranch Land</span>
+                    <div class="property-badge">NEW LISTING</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$175,000</div>
+                    <div class="property-title">Ranch Investment</div>
+                    <div class="property-location">📍 Wise County, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 30 Acres</div>
+                        <div class="spec">🐄 Livestock Ready</div>
+                        <div class="spec">🏡 Barn Included</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="residential" data-price="295000" data-size="0.3" data-status="reduced">
+                <div class="property-image" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">
+                    <span>4 Bed Fixer-Upper</span>
+                    <div class="property-badge">PRICE REDUCED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$295,000</div>
+                    <div class="property-title">Fix & Flip Opportunity</div>
+                    <div class="property-location">📍 The Colony, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">🛏️ 4 Bed</div>
+                        <div class="spec">🛁 3 Bath</div>
+                        <div class="spec">🔨 Needs TLC</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="58000" data-size="12" data-status="new">
+                <div class="property-image" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">
+                    <span>12 Acres Near Lake</span>
+                    <div class="property-badge">NEW LISTING</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$58,000</div>
+                    <div class="property-title">Lakeside Development</div>
+                    <div class="property-location">📍 Lake Lewisville Area</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 12 Acres</div>
+                        <div class="spec">🏞️ Lake Views</div>
+                        <div class="spec">⚡ Utilities Near</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="210000" data-size="40" data-status="featured">
+                <div class="property-image" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">
+                    <span>40 Acres Highway Frontage</span>
+                    <div class="property-badge featured">FEATURED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$210,000</div>
+                    <div class="property-title">Highway Commercial Tract</div>
+                    <div class="property-location">📍 I-35 Corridor, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 40 Acres</div>
+                        <div class="spec">🛣️ 1,200' Frontage</div>
+                        <div class="spec">🏪 Commercial Zoned</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="residential" data-price="425000" data-size="1" data-status="new">
+                <div class="property-image" style="background: linear-gradient(135deg, #fda085 0%, #f6d365 100%);">
+                    <span>New Construction</span>
+                    <div class="property-badge">NEW LISTING</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$425,000</div>
+                    <div class="property-title">Brand New Build</div>
+                    <div class="property-location">📍 Highland Village, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">🛏️ 4 Bed</div>
+                        <div class="spec">🛁 3.5 Bath</div>
+                        <div class="spec">✨ Move-in Ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="land" data-price="95000" data-size="18" data-status="reduced">
+                <div class="property-image" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                    <span>18 Acres Investment Land</span>
+                    <div class="property-badge">PRICE REDUCED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$95,000</div>
+                    <div class="property-title">Builder's Opportunity</div>
+                    <div class="property-location">📍 Little Elm, TX</div>
+                    <div class="property-specs">
+                        <div class="spec">📏 18 Acres</div>
+                        <div class="spec">🏘️ Subdivision Potential</div>
+                        <div class="spec">🚦 Near Schools</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-card" data-type="commercial" data-price="890000" data-size="3" data-status="featured">
+                <div class="property-image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <span>Retail Strip Center</span>
+                    <div class="property-badge featured">FEATURED</div>
+                </div>
+                <div class="property-info">
+                    <div class="property-price">$890,000</div>
+                    <div class="property-title">Fully Leased Retail</div>
+                    <div class="property-location">📍 Lewisville Shopping District</div>
+                    <div class="property-specs">
+                        <div class="spec">🏢 8,500 sqft</div>
+                        <div class="spec">💼 100% Occupied</div>
+                        <div class="spec">📊 9.1% Cap Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="contact-section" id="contact">
+        <div class="contact-container">
+            <div class="contact-form">
+                <h3>Request Property Information</h3>
+                <p>Interested in a property? Fill out the form and our team will contact you within 24 hours.</p>
+
+                <form onsubmit="event.preventDefault(); submitContactForm();">
+                    <div class="form-row">
+                        <input type="text" placeholder="First Name *" required>
+                        <input type="text" placeholder="Last Name *" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="email" placeholder="Email Address *" required>
+                        <input type="tel" placeholder="Phone Number *" required>
+                    </div>
+                    <div class="form-row">
+                        <select class="full-width" required>
+                            <option value="">I'm interested in...</option>
+                            <option value="land">Land/Lots</option>
+                            <option value="residential">Residential Properties</option>
+                            <option value="commercial">Commercial Properties</option>
+                            <option value="investment">Investment Opportunities</option>
+                            <option value="consultation">Free Consultation</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" class="full-width" placeholder="Property Address or ID (if applicable)">
+                    </div>
+                    <div class="form-row">
+                        <textarea class="full-width" placeholder="Message / Additional Details *" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Inquiry</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Premier Land & Properties</h4>
+                <p>Your trusted partner for Texas real estate investment opportunities.</p>
+                <p>Specializing in land acquisition, residential investments, and commercial properties.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="#properties">Browse Properties</a>
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Info</h4>
+                <p>📍 Lewisville, TX 75057</p>
+                <p>📞 (555) 123-4567</p>
+                <p>✉️ info@premierland.com</p>
+                <p>🕐 Mon-Sat: 9AM - 6PM</p>
+            </div>
+            <div class="footer-section">
+                <h4>Property Types</h4>
+                <a href="#">Agricultural Land</a>
+                <a href="#">Residential Homes</a>
+                <a href="#">Commercial Properties</a>
+                <a href="#">Development Land</a>
+                <a href="#">Investment Opportunities</a>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Premier Land & Properties. All rights reserved. | Website Demo
+        </div>
+    </footer>
+
+    <script>
+        function searchProperties() {
+            const location = document.getElementById('searchLocation').value;
+            const type = document.getElementById('searchType').value;
+            const price = document.getElementById('searchPrice').value;
+
+            alert(`Searching for:\nLocation: ${location || 'All'}\nType: ${type || 'All Types'}\nPrice: ${price || 'Any Price'}\n\nIn a real implementation, this would filter the properties database.`);
+        }
+
+        function filterProperties() {
+            const typeFilter = document.getElementById('filterType').value;
+            const acreageFilter = parseFloat(document.getElementById('filterAcreage').value);
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            const cards = document.querySelectorAll('.property-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                const cardSize = parseFloat(card.getAttribute('data-size'));
+                const cardStatus = card.getAttribute('data-status');
+
+                let show = true;
+
+                if (typeFilter !== 'all' && cardType !== typeFilter) show = false;
+                if (acreageFilter > 0 && cardSize < acreageFilter) show = false;
+                if (statusFilter !== 'all' && cardStatus !== statusFilter) show = false;
+
+                card.style.display = show ? 'block' : 'none';
+                if (show) visibleCount++;
+            });
+
+            document.getElementById('propertyCount').textContent = visibleCount;
+        }
+
+        function sortProperties() {
+            const sortBy = document.getElementById('sortBy').value;
+            const grid = document.getElementById('propertiesGrid');
+            const cards = Array.from(grid.children);
+
+            cards.sort((a, b) => {
+                switch(sortBy) {
+                    case 'price-low':
+                        return parseFloat(a.getAttribute('data-price')) - parseFloat(b.getAttribute('data-price'));
+                    case 'price-high':
+                        return parseFloat(b.getAttribute('data-price')) - parseFloat(a.getAttribute('data-price'));
+                    case 'size':
+                        return parseFloat(b.getAttribute('data-size')) - parseFloat(a.getAttribute('data-size'));
+                    case 'featured':
+                    default:
+                        return a.getAttribute('data-status') === 'featured' ? -1 : 1;
+                }
+            });
+
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        function submitContactForm() {
+            alert('Thank you for your inquiry!\n\nIn a real implementation, this form would:\n✓ Send email to property manager\n✓ Add lead to CRM\n✓ Trigger automated follow-up\n✓ Send confirmation to client\n\nYou will be contacted within 24 hours.');
+        }
+
+        document.querySelectorAll('.property-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('.property-title').textContent;
+                const price = this.querySelector('.property-price').textContent;
+                const location = this.querySelector('.property-location').textContent;
+
+                alert(`Property Details:\n\n${title}\n${price}\n${location}\n\nIn a real implementation, this would open a detailed property page with:\n• Photo gallery\n• Full description\n• Virtual tour\n• Map & directions\n• Schedule showing button\n• Mortgage calculator\n• Contact agent form`);
+            });
+        });
+    </script>
+</body>
+</html>
