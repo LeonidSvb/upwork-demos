@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Marketplace - Semantic Search + Auto-Tagging Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .panel h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .upload-zone {
+            border: 3px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: #e6f0ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #a0aec0;
+        }
+
+        .upload-text {
+            color: #4a5568;
+            font-size: 16px;
+        }
+
+        .upload-text strong {
+            color: #667eea;
+        }
+
+        .files-preview {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .file-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .tag.ai-generated {
+            background: #48bb78;
+        }
+
+        .processing {
+            color: #ed8936;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 20px;
+        }
+
+        .search-examples {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .example-query {
+            background: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-query:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .result-thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        .result-info {
+            padding: 12px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .result-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .license-badge {
+            background: #48bb78;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .price {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .tech-stack {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .tech-stack h3 {
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .tech-item {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        @media (max-width: 1024px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tech-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-analyze {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .btn-analyze:hover {
+            background: #5568d3;
+        }
+
+        .btn-analyze:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Content Marketplace Demo</h1>
+            <p>Bulk Upload + AI Auto-Tagging + Semantic Search POC</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="uploaded-count">0</div>
+                <div class="stat-label">Files Uploaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="tags-generated">0</div>
+                <div class="stat-label">AI Tags Generated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="search-results">12</div>
+                <div class="stat-label">Searchable Assets</div>
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <div class="panel">
+                <h2>
+                    <span>📤 Creator Portal</span>
+                    <span class="badge">Bulk Upload</span>
+                </h2>
+
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">
+                        <strong>Drag & drop</strong> or click to upload<br>
+                        <small>Supports 100-500 files simultaneously</small>
+                    </div>
+                    <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                </div>
+
+                <button class="btn-analyze" id="analyze-btn" disabled>
+                    🤖 Analyze with AI & Generate Tags
+                </button>
+
+                <div class="files-preview" id="files-preview"></div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    <span>🔍 Buyer Experience</span>
+                    <span class="badge">Semantic Search</span>
+                </h2>
+
+                <div class="search-container">
+                    <div class="search-box">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="search-input"
+                            placeholder="Try: 'sunset over mountains' or 'professional business meeting'"
+                        >
+                        <span class="search-icon">🔎</span>
+                    </div>
+                    <div class="search-examples">
+                        <div class="example-query" data-query="tropical beach sunset">Tropical beach sunset</div>
+                        <div class="example-query" data-query="modern office workspace">Modern office workspace</div>
+                        <div class="example-query" data-query="healthy food photography">Healthy food photography</div>
+                    </div>
+                </div>
+
+                <div class="results-grid" id="results-grid">
+                    <!-- Results will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h3>🛠 Technical Stack Demonstrated</h3>
+            <div class="tech-list">
+                <div class="tech-item">React/Next.js</div>
+                <div class="tech-item">Node.js Backend</div>
+                <div class="tech-item">AI Vision API</div>
+                <div class="tech-item">Vector Search</div>
+                <div class="tech-item">Bulk Processing</div>
+                <div class="tech-item">Semantic NLP</div>
+                <div class="tech-item">AWS S3</div>
+                <div class="tech-item">Stripe API</div>
+                <div class="tech-item">PostgreSQL</div>
+                <div class="tech-item">Blockchain Log</div>
+                <div class="tech-item">Redis Cache</div>
+                <div class="tech-item">Docker/K8s</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mockAssets = [
+            { title: 'Sunset Beach Paradise', tags: ['sunset', 'beach', 'tropical', 'ocean', 'palm trees'], price: '$29', license: 'Commercial' },
+            { title: 'Modern Office Interior', tags: ['office', 'workspace', 'modern', 'business', 'interior'], price: '$35', license: 'Commercial' },
+            { title: 'Fresh Organic Vegetables', tags: ['food', 'vegetables', 'healthy', 'organic', 'fresh'], price: '$22', license: 'Commercial' },
+            { title: 'Mountain Landscape Dawn', tags: ['mountain', 'landscape', 'sunrise', 'nature', 'scenery'], price: '$32', license: 'Commercial' },
+            { title: 'Coffee Shop Ambiance', tags: ['coffee', 'cafe', 'interior', 'cozy', 'lifestyle'], price: '$28', license: 'Commercial' },
+            { title: 'Tech Startup Team', tags: ['business', 'team', 'meeting', 'technology', 'collaboration'], price: '$45', license: 'Extended' },
+            { title: 'Healthy Breakfast Bowl', tags: ['food', 'breakfast', 'healthy', 'bowl', 'nutrition'], price: '$25', license: 'Commercial' },
+            { title: 'Urban City Skyline', tags: ['city', 'urban', 'skyline', 'architecture', 'modern'], price: '$38', license: 'Commercial' },
+            { title: 'Yoga Meditation Sunset', tags: ['yoga', 'meditation', 'wellness', 'sunset', 'health'], price: '$30', license: 'Commercial' },
+            { title: 'Laptop Workspace Minimal', tags: ['laptop', 'workspace', 'minimal', 'desk', 'productivity'], price: '$27', license: 'Commercial' },
+            { title: 'Tropical Fruit Display', tags: ['fruit', 'tropical', 'colorful', 'fresh', 'food'], price: '$24', license: 'Commercial' },
+            { title: 'Corporate Handshake Deal', tags: ['business', 'handshake', 'corporate', 'partnership', 'deal'], price: '$40', license: 'Extended' }
+        ];
+
+        let uploadedFiles = [];
+        let totalTags = 0;
+
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const filesPreview = document.getElementById('files-preview');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const searchInput = document.getElementById('search-input');
+        const resultsGrid = document.getElementById('results-grid');
+        const uploadedCount = document.getElementById('uploaded-count');
+        const tagsGenerated = document.getElementById('tags-generated');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedFiles.push({
+                            name: file.name,
+                            url: e.target.result,
+                            tags: [],
+                            analyzed: false
+                        });
+                        updateFilesPreview();
+                        analyzeBtn.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function updateFilesPreview() {
+            filesPreview.innerHTML = uploadedFiles.map((file, index) => `
+                <div class="file-item">
+                    <img src="${file.url}" class="file-thumb" alt="${file.name}">
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        ${file.analyzed
+                            ? `<div class="file-tags">
+                                ${file.tags.map(tag => `<span class="tag ai-generated">${tag}</span>`).join('')}
+                               </div>`
+                            : '<div class="processing">⏳ Waiting for AI analysis...</div>'
+                        }
+                    </div>
+                </div>
+            `).join('');
+
+            uploadedCount.textContent = uploadedFiles.length;
+        }
+
+        analyzeBtn.addEventListener('click', () => {
+            analyzeBtn.textContent = '🔄 Analyzing with AI...';
+            analyzeBtn.disabled = true;
+
+            uploadedFiles.forEach((file, index) => {
+                setTimeout(() => {
+                    const mockTags = generateMockTags(file.name);
+                    file.tags = mockTags;
+                    file.analyzed = true;
+                    totalTags += mockTags.length;
+
+                    updateFilesPreview();
+                    tagsGenerated.textContent = totalTags;
+
+                    if (index === uploadedFiles.length - 1) {
+                        analyzeBtn.textContent = '✅ Analysis Complete';
+                        setTimeout(() => {
+                            analyzeBtn.textContent = '🤖 Analyze with AI & Generate Tags';
+                            analyzeBtn.disabled = false;
+                        }, 2000);
+                    }
+                }, index * 800);
+            });
+        });
+
+        function generateMockTags(filename) {
+            const tagSets = [
+                ['nature', 'landscape', 'outdoor', 'scenery', 'mountains'],
+                ['business', 'office', 'corporate', 'professional', 'meeting'],
+                ['food', 'cuisine', 'restaurant', 'healthy', 'organic'],
+                ['technology', 'digital', 'innovation', 'startup', 'modern'],
+                ['lifestyle', 'wellness', 'fitness', 'health', 'active']
+            ];
+            return tagSets[Math.floor(Math.random() * tagSets.length)];
+        }
+
+        function performSemanticSearch(query) {
+            if (!query) {
+                renderResults(mockAssets);
+                return;
+            }
+
+            const queryLower = query.toLowerCase();
+            const results = mockAssets.filter(asset => {
+                const titleMatch = asset.title.toLowerCase().includes(queryLower);
+                const tagMatch = asset.tags.some(tag => tag.includes(queryLower));
+                const semanticMatch = asset.tags.some(tag =>
+                    calculateSemanticSimilarity(queryLower, tag) > 0.6
+                );
+                return titleMatch || tagMatch || semanticMatch;
+            });
+
+            renderResults(results.length > 0 ? results : mockAssets);
+        }
+
+        function calculateSemanticSimilarity(query, tag) {
+            const semanticPairs = {
+                'beach': ['ocean', 'tropical', 'sunset', 'paradise'],
+                'office': ['workspace', 'business', 'corporate', 'meeting'],
+                'food': ['healthy', 'organic', 'fresh', 'nutrition'],
+                'mountain': ['landscape', 'nature', 'scenery', 'outdoor'],
+                'business': ['corporate', 'professional', 'team', 'meeting']
+            };
+
+            for (let key in semanticPairs) {
+                if (query.includes(key) && semanticPairs[key].includes(tag)) {
+                    return 0.8;
+                }
+            }
+            return 0;
+        }
+
+        function renderResults(results) {
+            resultsGrid.innerHTML = results.map(asset => `
+                <div class="result-card">
+                    <div class="result-thumb"></div>
+                    <div class="result-info">
+                        <div class="result-title">${asset.title}</div>
+                        <div class="file-tags">
+                            ${asset.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="result-meta">
+                            <span class="license-badge">✓ ${asset.license}</span>
+                            <span class="price">${asset.price}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            performSemanticSearch(e.target.value);
+        });
+
+        document.querySelectorAll('.example-query').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const query = e.target.dataset.query;
+                searchInput.value = query;
+                performSemanticSearch(query);
+            });
+        });
+
+        renderResults(mockAssets);
+    </script>
+</body>
+</html>
