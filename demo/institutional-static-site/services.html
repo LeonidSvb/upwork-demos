@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Services offered including semantic HTML development, accessibility implementation, and standards-compliant web development">
+    <title>Services - Institutional Website Demo</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Institutional Website Demo",
+        "url": "https://example.com"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://example.com"
+        }, {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Services",
+            "item": "https://example.com/services.html"
+        }]
+    }
+    </script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header role="banner">
+        <div class="container">
+            <h1>Institutional Website Demo</h1>
+            <p class="tagline">Standards-Compliant Static Site</p>
+        </div>
+    </header>
+
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html" aria-current="page">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+        <div class="container">
+            <ol>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html" aria-current="page">Services</a></li>
+            </ol>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main">
+        <div class="container">
+            <article>
+                <header>
+                    <h2>Services Overview</h2>
+                </header>
+
+                <section>
+                    <h3>Core Development Services</h3>
+                    <p>Specialized in building static institutional websites that prioritize standards compliance, accessibility, and performance over visual complexity.</p>
+                </section>
+
+                <section>
+                    <h3>Semantic HTML5 Development</h3>
+                    <p>Proper document structure using appropriate HTML5 elements. Correct heading hierarchy for logical content organization. Meaningful markup that enhances both SEO and accessibility.</p>
+
+                    <h4>Key Deliverables</h4>
+                    <ul>
+                        <li>Valid HTML5 markup</li>
+                        <li>Proper heading hierarchy</li>
+                        <li>Semantic elements for content structure</li>
+                        <li>Clean, readable code</li>
+                        <li>W3C validation compliance</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>Accessibility Implementation</h3>
+                    <p>Full WCAG 2.1 Level AA compliance ensuring your website is usable by all visitors regardless of ability or assistive technology.</p>
+
+                    <h4>Accessibility Features</h4>
+                    <ul>
+                        <li>Keyboard navigation support</li>
+                        <li>ARIA landmarks and labels</li>
+                        <li>Sufficient color contrast ratios</li>
+                        <li>Focus indicators for interactive elements</li>
+                        <li>Screen reader optimization</li>
+                        <li>Skip navigation links</li>
+                        <li>Responsive text sizing</li>
+                        <li>Semantic form labels and error messages</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>Performance Optimization</h3>
+                    <p>Minimal code and zero external dependencies result in fast-loading websites with excellent Lighthouse scores.</p>
+
+                    <h4>Performance Standards</h4>
+                    <ul>
+                        <li>Lighthouse score 90+ mobile and desktop</li>
+                        <li>Minimal CSS and JavaScript</li>
+                        <li>No external dependencies</li>
+                        <li>Optimized critical rendering path</li>
+                        <li>Efficient browser parsing</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>Schema Markup Implementation</h3>
+                    <p>JSON-LD structured data helps search engines understand your content and can enhance search result appearance.</p>
+
+                    <h4>Schema Types</h4>
+                    <ul>
+                        <li>Organization schema</li>
+                        <li>Breadcrumb schema</li>
+                        <li>Article schema</li>
+                        <li>Custom schema as required</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>Cross-Browser Compatibility</h3>
+                    <p>Thorough testing ensures consistent appearance and functionality across all major browsers without requiring polyfills or compatibility libraries.</p>
+
+                    <h4>Tested Browsers</h4>
+                    <ul>
+                        <li>Google Chrome</li>
+                        <li>Mozilla Firefox</li>
+                        <li>Apple Safari</li>
+                        <li>Microsoft Edge</li>
+                    </ul>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>Institutional Website Demo - Built with precision and standards compliance</p>
+            <p>HTML5 - CSS3 - WCAG 2.1 AA - JSON-LD Schema</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

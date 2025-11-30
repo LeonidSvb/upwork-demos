@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact information for standards-compliant web development services">
+    <title>Contact - Institutional Website Demo</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Institutional Website Demo",
+        "url": "https://example.com"
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://example.com"
+        }, {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Contact",
+            "item": "https://example.com/contact.html"
+        }]
+    }
+    </script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header role="banner">
+        <div class="container">
+            <h1>Institutional Website Demo</h1>
+            <p class="tagline">Standards-Compliant Static Site</p>
+        </div>
+    </header>
+
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html" aria-current="page">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+        <div class="container">
+            <ol>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="contact.html" aria-current="page">Contact</a></li>
+            </ol>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main">
+        <div class="container">
+            <article>
+                <header>
+                    <h2>Contact Information</h2>
+                </header>
+
+                <section>
+                    <h3>Get in Touch</h3>
+                    <p>This contact page demonstrates proper form structure with accessibility features including labels, required field indicators, and error handling.</p>
+                </section>
+
+                <section>
+                    <h3>Contact Form</h3>
+                    <form method="post" action="#" novalidate>
+                        <div class="form-group">
+                            <label for="name">Name <span aria-label="required">*</span></label>
+                            <input type="text" id="name" name="name" required aria-required="true">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address <span aria-label="required">*</span></label>
+                            <input type="email" id="email" name="email" required aria-required="true">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subject">Subject <span aria-label="required">*</span></label>
+                            <input type="text" id="subject" name="subject" required aria-required="true">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Message <span aria-label="required">*</span></label>
+                            <textarea id="message" name="message" rows="6" required aria-required="true"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">Send Message</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section>
+                    <h3>Form Accessibility Features</h3>
+                    <ul>
+                        <li>All form fields have associated labels</li>
+                        <li>Required fields clearly marked</li>
+                        <li>Keyboard accessible form controls</li>
+                        <li>Focus indicators on all interactive elements</li>
+                        <li>ARIA attributes for screen readers</li>
+                        <li>Logical tab order</li>
+                    </ul>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>Institutional Website Demo - Built with precision and standards compliance</p>
+            <p>HTML5 - CSS3 - WCAG 2.1 AA - JSON-LD Schema</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

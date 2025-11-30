@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional institutional website built with semantic HTML5, WCAG 2.1 AA compliance, and minimal CSS">
+    <title>Institutional Website Demo - Standards-Compliant Static Site</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Institutional Website Demo",
+        "url": "https://example.com",
+        "description": "Demonstration of standards-compliant static institutional website",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "US"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://example.com"
+        }]
+    }
+    </script>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header role="banner">
+        <div class="container">
+            <h1>Institutional Website Demo</h1>
+            <p class="tagline">Standards-Compliant Static Site</p>
+        </div>
+    </header>
+
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <ul>
+                <li><a href="index.html" aria-current="page">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+        <div class="container">
+            <ol>
+                <li><a href="index.html" aria-current="page">Home</a></li>
+            </ol>
+        </div>
+    </nav>
+
+    <main id="main-content" role="main">
+        <div class="container">
+            <article>
+                <header>
+                    <h2>Welcome to Our Institution</h2>
+                </header>
+
+                <section>
+                    <h3>Mission Statement</h3>
+                    <p>This demonstration showcases a precision-built static institutional website following strict specifications and web standards. Every element has been carefully crafted to ensure semantic correctness, accessibility compliance, and optimal performance.</p>
+
+                    <p>The site architecture emphasizes clarity, simplicity, and adherence to established best practices in modern web development. No external dependencies, no unnecessary scripts, no design embellishments—only clean, purposeful code.</p>
+                </section>
+
+                <section>
+                    <h3>Core Principles</h3>
+
+                    <h4>Semantic HTML5</h4>
+                    <p>All markup uses appropriate HTML5 semantic elements including header, nav, main, article, section, and footer. Heading hierarchy is maintained throughout the document structure.</p>
+
+                    <h4>WCAG 2.1 AA Accessibility</h4>
+                    <p>Full keyboard navigation support with visible focus indicators. All interactive elements are accessible via keyboard. Color contrast ratios meet WCAG AA standards. ARIA landmarks and labels provide screen reader support.</p>
+
+                    <h4>Performance Optimization</h4>
+                    <p>Minimal CSS and JavaScript ensure fast load times. No external dependencies reduce HTTP requests. Clean code structure enables efficient browser parsing and rendering.</p>
+
+                    <h4>Standards Compliance</h4>
+                    <p>Valid HTML5 and CSS3 code. Proper JSON-LD schema markup for search engines. Security headers ready for deployment. Cross-browser compatibility ensured.</p>
+                </section>
+
+                <section>
+                    <h3>Technical Specifications</h3>
+                    <dl>
+                        <dt>HTML Version</dt>
+                        <dd>HTML5 with semantic elements</dd>
+
+                        <dt>CSS Methodology</dt>
+                        <dd>Vanilla CSS with minimal styling</dd>
+
+                        <dt>JavaScript</dt>
+                        <dd>Minimal vanilla JavaScript for essential functionality</dd>
+
+                        <dt>Accessibility</dt>
+                        <dd>WCAG 2.1 Level AA compliant</dd>
+
+                        <dt>Schema Markup</dt>
+                        <dd>JSON-LD for Organization and Breadcrumb</dd>
+
+                        <dt>Color Scheme</dt>
+                        <dd>Monochrome with high contrast ratios</dd>
+
+                        <dt>Typography</dt>
+                        <dd>System font stack for optimal performance</dd>
+
+                        <dt>Responsive Design</dt>
+                        <dd>Mobile-first approach without frameworks</dd>
+                    </dl>
+                </section>
+
+                <section>
+                    <h3>What This Demonstrates</h3>
+                    <ul>
+                        <li>Strict adherence to specifications without deviation</li>
+                        <li>Clean, readable, and maintainable code structure</li>
+                        <li>Proper document outline and heading hierarchy</li>
+                        <li>Keyboard-accessible navigation and interaction</li>
+                        <li>Screen reader compatibility with ARIA support</li>
+                        <li>High contrast for visual accessibility</li>
+                        <li>Semantic markup for search engine optimization</li>
+                        <li>Fast loading with minimal resource requirements</li>
+                        <li>Cross-browser compatibility without polyfills</li>
+                        <li>Professional execution without creative interpretation</li>
+                    </ul>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>Institutional Website Demo - Built with precision and standards compliance</p>
+            <p>HTML5 - CSS3 - WCAG 2.1 AA - JSON-LD Schema</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
