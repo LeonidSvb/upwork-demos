@@ -1,0 +1,34 @@
+Hi,
+
+I've created a demo showing my exact process for converting Ecwid sites to custom code: https://leonidsvb.github.io/upwork-demos/demo/ecwid-clone-demo.html
+
+I understand you need:
+✓ Exact pixel-perfect copy of your Ecwid website
+✓ Clean HTML/CSS/JS code you can self-host
+✓ Fast turnaround (I can start immediately)
+
+My process:
+1. Inspect your Ecwid site with DevTools
+2. Extract all CSS rules, layouts, images, fonts
+3. Rebuild in clean HTML/CSS matching 100%
+4. Add JavaScript for all functionality (cart, forms, etc.)
+5. Test side-by-side to ensure identical appearance
+6. Deliver complete code + documentation
+
+Timeline: 48-72 hours from receiving your Ecwid URL
+
+What you get:
+- Pixel-perfect recreation
+- No monthly Ecwid fees anymore
+- Faster loading (no platform bloat)
+- Full control over everything
+- Mobile responsive
+- Clean, documented code
+
+Please send me your Ecwid website URL so I can analyze the exact structure and confirm the 48-72 hour timeline.
+
+Ready to start immediately.
+
+Price: $250 fixed (as posted)
+
+Best regards
