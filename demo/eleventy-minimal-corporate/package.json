@@ -1,0 +1,23 @@
+{
+  "name": "eleventy-minimal-corporate",
+  "version": "1.0.0",
+  "description": "Minimal, high-performance corporate website built with Eleventy (11ty)",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "clean": "rm -rf _site"
+  },
+  "keywords": [
+    "eleventy",
+    "11ty",
+    "static-site",
+    "jamstack",
+    "minimal",
+    "performance"
+  ],
+  "author": "Leonid",
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}
