@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EADI - Electronic Attitude Direction Indicator (Canvas Demo)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .instrument-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        #eadi-canvas {
+            background: #000;
+            border-radius: 50%;
+            box-shadow:
+                0 0 0 15px rgba(60, 60, 70, 0.9),
+                0 0 0 18px rgba(100, 100, 110, 0.6),
+                inset 0 0 30px rgba(0,0,0,0.5),
+                0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-radius: 3px;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .value {
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info li {
+            padding: 5px 0;
+        }
+
+        .info li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>EADI Canvas Conversion Demo</h1>
+        <p>Electronic Attitude Direction Indicator - QT to JavaScript/Canvas</p>
+    </div>
+
+    <div class="container">
+        <div class="instrument-container">
+            <canvas id="eadi-canvas" width="400" height="400"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="pitch">Pitch (Degrees)</label>
+                <input type="range" id="pitch" min="-30" max="30" value="0" step="1">
+                <div class="value-display">
+                    <span>Pitch Angle</span>
+                    <span class="value" id="pitch-value">0°</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="roll">Roll (Degrees)</label>
+                <input type="range" id="roll" min="-60" max="60" value="0" step="1">
+                <div class="value-display">
+                    <span>Roll Angle</span>
+                    <span class="value" id="roll-value">0°</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="altitude">Altitude (Feet)</label>
+                <input type="range" id="altitude" min="0" max="50000" value="10000" step="100">
+                <div class="value-display">
+                    <span>Altitude</span>
+                    <span class="value" id="altitude-value">10000 ft</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="speed">Airspeed (Knots)</label>
+                <input type="range" id="speed" min="0" max="500" value="250" step="5">
+                <div class="value-display">
+                    <span>Speed</span>
+                    <span class="value" id="speed-value">250 kts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>Technical Implementation</h3>
+            <ul>
+                <li>Pure JavaScript Canvas rendering</li>
+                <li>Accurate coordinate system transformation (QT to Canvas)</li>
+                <li>Real-time pitch and roll indication</li>
+                <li>Artificial horizon with sky/ground separation</li>
+                <li>Pitch ladder with degree markings</li>
+                <li>Roll indicator with triangular marker</li>
+                <li>Altitude and airspeed displays</li>
+                <li>Bank angle reference marks</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        class EADI {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+                this.centerX = this.width / 2;
+                this.centerY = this.height / 2;
+                this.radius = Math.min(this.width, this.height) / 2 - 20;
+
+                this.pitch = 0;
+                this.roll = 0;
+                this.altitude = 10000;
+                this.speed = 250;
+            }
+
+            setPitch(degrees) {
+                this.pitch = degrees;
+                this.draw();
+            }
+
+            setRoll(degrees) {
+                this.roll = degrees;
+                this.draw();
+            }
+
+            setAltitude(feet) {
+                this.altitude = feet;
+                this.draw();
+            }
+
+            setSpeed(knots) {
+                this.speed = knots;
+                this.draw();
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                this.ctx.clip();
+
+                this.drawHorizon();
+                this.drawPitchLadder();
+
+                this.ctx.restore();
+
+                this.drawRollIndicator();
+                this.drawAircraftSymbol();
+                this.drawAltitudeIndicator();
+                this.drawSpeedIndicator();
+                this.drawFrame();
+            }
+
+            drawHorizon() {
+                const rollRad = (this.roll * Math.PI) / 180;
+                const pitchPixels = (this.pitch * this.radius) / 45;
+
+                this.ctx.save();
+                this.ctx.rotate(rollRad);
+
+                const skyGradient = this.ctx.createLinearGradient(0, -this.radius * 2, 0, 0);
+                skyGradient.addColorStop(0, '#001a4d');
+                skyGradient.addColorStop(1, '#3399ff');
+
+                this.ctx.fillStyle = skyGradient;
+                this.ctx.fillRect(-this.radius * 2, -this.radius * 2 + pitchPixels, this.radius * 4, this.radius * 2);
+
+                const groundGradient = this.ctx.createLinearGradient(0, 0, 0, this.radius * 2);
+                groundGradient.addColorStop(0, '#8B4513');
+                groundGradient.addColorStop(1, '#4a2511');
+
+                this.ctx.fillStyle = groundGradient;
+                this.ctx.fillRect(-this.radius * 2, pitchPixels, this.radius * 4, this.radius * 2);
+
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(-this.radius * 2, pitchPixels);
+                this.ctx.lineTo(this.radius * 2, pitchPixels);
+                this.ctx.stroke();
+
+                this.ctx.restore();
+            }
+
+            drawPitchLadder() {
+                const rollRad = (this.roll * Math.PI) / 180;
+                const pixelsPerDegree = this.radius / 45;
+
+                this.ctx.save();
+                this.ctx.rotate(rollRad);
+
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.lineWidth = 2;
+                this.ctx.font = 'bold 12px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+
+                for (let angle = -30; angle <= 30; angle += 10) {
+                    if (angle === 0) continue;
+
+                    const y = -angle * pixelsPerDegree - (this.pitch * pixelsPerDegree);
+                    const lineWidth = angle % 10 === 0 ? 60 : 40;
+
+                    if (Math.abs(y) < this.radius * 1.5) {
+                        if (angle > 0) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(-lineWidth / 2, y);
+                            this.ctx.lineTo(-lineWidth / 2 + 15, y);
+                            this.ctx.moveTo(lineWidth / 2, y);
+                            this.ctx.lineTo(lineWidth / 2 - 15, y);
+                            this.ctx.stroke();
+
+                            this.ctx.fillText(Math.abs(angle).toString(), -lineWidth / 2 - 15, y);
+                            this.ctx.fillText(Math.abs(angle).toString(), lineWidth / 2 + 15, y);
+                        } else {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(-lineWidth / 2, y);
+                            this.ctx.lineTo(lineWidth / 2, y);
+                            this.ctx.stroke();
+
+                            this.ctx.fillText(Math.abs(angle).toString(), -lineWidth / 2 - 15, y);
+                            this.ctx.fillText(Math.abs(angle).toString(), lineWidth / 2 + 15, y);
+                        }
+                    }
+                }
+
+                this.ctx.restore();
+            }
+
+            drawRollIndicator() {
+                const rollRad = (this.roll * Math.PI) / 180;
+                const indicatorRadius = this.radius + 10;
+
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.lineWidth = 2;
+
+                const marks = [-60, -45, -30, -20, -10, 0, 10, 20, 30, 45, 60];
+                marks.forEach(angle => {
+                    const rad = (angle * Math.PI) / 180;
+                    const length = angle % 30 === 0 ? 15 : 10;
+                    const startRadius = indicatorRadius - 5;
+                    const endRadius = startRadius - length;
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(Math.sin(rad) * startRadius, -Math.cos(rad) * startRadius);
+                    this.ctx.lineTo(Math.sin(rad) * endRadius, -Math.cos(rad) * endRadius);
+                    this.ctx.stroke();
+                });
+
+                this.ctx.rotate(rollRad);
+                this.ctx.fillStyle = '#ffeb3b';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -(indicatorRadius - 5));
+                this.ctx.lineTo(-8, -(indicatorRadius - 18));
+                this.ctx.lineTo(8, -(indicatorRadius - 18));
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+
+                this.ctx.restore();
+            }
+
+            drawAircraftSymbol() {
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+
+                this.ctx.strokeStyle = '#ffeb3b';
+                this.ctx.fillStyle = '#ffeb3b';
+                this.ctx.lineWidth = 3;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(-50, 0);
+                this.ctx.lineTo(-15, 0);
+                this.ctx.moveTo(15, 0);
+                this.ctx.lineTo(50, 0);
+                this.ctx.moveTo(0, 0);
+                this.ctx.lineTo(0, 10);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.restore();
+            }
+
+            drawAltitudeIndicator() {
+                const x = this.centerX + this.radius - 60;
+                const y = this.centerY;
+
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(x - 30, y - 25, 60, 50);
+
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(x - 30, y - 25, 60, 50);
+
+                this.ctx.fillStyle = '#0f0';
+                this.ctx.font = 'bold 16px monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(Math.round(this.altitude).toString(), x, y - 5);
+
+                this.ctx.font = '10px monospace';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.fillText('ALT', x, y + 12);
+            }
+
+            drawSpeedIndicator() {
+                const x = this.centerX - this.radius + 60;
+                const y = this.centerY;
+
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(x - 30, y - 25, 60, 50);
+
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(x - 30, y - 25, 60, 50);
+
+                this.ctx.fillStyle = '#0f0';
+                this.ctx.font = 'bold 16px monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(Math.round(this.speed).toString(), x, y - 5);
+
+                this.ctx.font = '10px monospace';
+                this.ctx.fillStyle = '#fff';
+                this.ctx.fillText('SPD', x, y + 12);
+            }
+
+            drawFrame() {
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+
+                this.ctx.strokeStyle = 'rgba(100, 100, 110, 0.8)';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+
+                this.ctx.restore();
+            }
+        }
+
+        const eadi = new EADI('eadi-canvas');
+        eadi.draw();
+
+        const pitchSlider = document.getElementById('pitch');
+        const rollSlider = document.getElementById('roll');
+        const altitudeSlider = document.getElementById('altitude');
+        const speedSlider = document.getElementById('speed');
+
+        const pitchValue = document.getElementById('pitch-value');
+        const rollValue = document.getElementById('roll-value');
+        const altitudeValue = document.getElementById('altitude-value');
+        const speedValue = document.getElementById('speed-value');
+
+        pitchSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            eadi.setPitch(value);
+            pitchValue.textContent = value + '°';
+        });
+
+        rollSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            eadi.setRoll(value);
+            rollValue.textContent = value + '°';
+        });
+
+        altitudeSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            eadi.setAltitude(value);
+            altitudeValue.textContent = value + ' ft';
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            eadi.setSpeed(value);
+            speedValue.textContent = value + ' kts';
+        });
+
+        let demoAngle = 0;
+        function animateDemo() {
+            demoAngle += 0.5;
+            const pitch = Math.sin(demoAngle * 0.02) * 15;
+            const roll = Math.sin(demoAngle * 0.015) * 30;
+
+            if (!pitchSlider.matches(':active')) {
+                pitchSlider.value = pitch;
+                eadi.setPitch(pitch);
+                pitchValue.textContent = Math.round(pitch) + '°';
+            }
+
+            if (!rollSlider.matches(':active')) {
+                rollSlider.value = roll;
+                eadi.setRoll(roll);
+                rollValue.textContent = Math.round(roll) + '°';
+            }
+
+            requestAnimationFrame(animateDemo);
+        }
+
+        setTimeout(() => {
+            animateDemo();
+        }, 2000);
+    </script>
+</body>
+</html>
