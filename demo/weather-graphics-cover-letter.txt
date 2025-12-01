@@ -1,0 +1,62 @@
+POTATO2025
+
+Hi,
+
+Before applying, I already built a working prototype demonstrating your exact technical requirements:
+https://leonidsvb.github.io/upwork-demos/demo/weather-graphics-demo.html
+
+It shows:
+✓ MapLibre GL base map (Mapbox-compatible)
+✓ Timeline animation with 7 time steps
+✓ Drawing tools (H/L pressure, fronts, markers)
+✓ Smooth object interpolation across timeline
+✓ Play/pause/scrub controls
+✓ Export PNG at 1920×1080
+✓ OBS-ready fixed layout
+
+Because I understand your architecture (you already have a prototype), extending it will be faster than building from scratch.
+
+ANSWERS TO YOUR QUESTIONS:
+
+1. MapboxGL/MapLibre experience:
+Yes. Built multiple GIS applications with MapboxGL, custom layers, overlays, and interactive features. The demo uses MapLibre (open-source Mapbox fork).
+
+2. Timeline-based animations:
+Yes. The demo shows exactly this — objects interpolate smoothly across time steps synced to forecast timeline. This is the core technical challenge, and I've already solved it.
+
+3. Weather APIs / geospatial data:
+Yes. Integrated weather APIs (OpenWeather, Weather.gov), worked with GeoJSON extensively, understand raster tiles, vector layers, and time-series data structures.
+
+4. PNG export at 1920×1080:
+Yes. Demo includes working export using html2canvas. Can also implement server-side rendering for better quality or frame sequences for video export.
+
+5. Modular structure approach:
+- Separate modules for: Map Engine, Layer Manager, Drawing Tools, Animation Engine, Timeline Controller, Export System
+- Each tool as independent class with start/end position properties
+- Central state manager for timeline synchronization
+- Plugin architecture for adding new Xweather layers
+- Clean separation: UI ↔ Logic ↔ Map Rendering
+
+TECHNICAL PLAN:
+
+Week 1: Integrate ALL Xweather layers + modular layer config
+Week 2: Complete drawing tools suite + edit/delete logic
+Week 3: Animation engine + timeline sync with Xweather timestamps
+Week 4: Export suite (PNG + sequence) + OBS compatibility polish
+
+Timeline: 4 weeks
+Budget: $3,000 fixed (as posted)
+
+WHY I'M THE RIGHT FIT:
+✓ I already understand your project (demo proves it)
+✓ Can work with your existing prototype code
+✓ Timeline animation is exactly what I specialize in
+✓ Fast delivery with modular, clean architecture
+✓ No learning curve — ready to extend your code immediately
+
+The demo shows I can deliver. The prototype already validates the approach.
+
+Ready to start immediately.
+
+Best regards,
+Leonid

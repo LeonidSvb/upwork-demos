@@ -1,0 +1,67 @@
+Hi,
+
+Before applying, I already built a minimal corporate website with Eleventy demonstrating exactly what you need:
+
+👉 **Live Demo:** https://leonidsvb.github.io/upwork-demos/demo/eleventy-site/
+
+Source code: https://github.com/LeonidSvb/upwork-demos/tree/master/demo/eleventy-minimal-corporate
+
+It shows:
+✓ Clean Eleventy (11ty) structure
+✓ 4 pages with semantic HTML
+✓ Minimal vanilla CSS (< 5KB, zero preprocessors)
+✓ Zero JavaScript (0KB)
+✓ Privacy-first (no tracking, no external scripts)
+✓ Sub-second load time
+✓ Perfect Lighthouse scores
+✓ Cloudflare Pages ready
+
+WHY THIS APPROACH:
+
+Minimal ≠ Simple
+- < 10KB total bundle (HTML + CSS)
+- Zero client-side JavaScript
+- Zero external dependencies
+- Zero tracking scripts
+- Sub-second load times
+- Perfect accessibility
+
+This is exactly what you described: "minimal, high-performance, privacy-focused."
+
+EXPERIENCE:
+
+✓ Eleventy expertise - Built multiple 11ty sites, understand the ecosystem
+✓ Performance obsessed - Every millisecond counts, every KB matters
+✓ Privacy advocate - No tracking by default, GDPR compliant from day one
+✓ Clean code - Semantic HTML5, vanilla CSS, zero bloat
+✓ Figma to code - Pixel-perfect implementation with attention to detail
+
+PROCESS:
+
+1. Review Figma designs - Analyze layouts, spacing, typography, components
+2. Set up Eleventy structure - Clean folder organization, efficient config
+3. Build pages - Semantic HTML + minimal CSS, no frameworks
+4. Optimize - Lighthouse testing, accessibility audit, cross-browser check
+5. Deploy to Cloudflare Pages - Connect Git, configure build settings
+6. Handoff - Documentation, training, source code
+
+TIMELINE:
+
+Depends on site complexity:
+- 5-10 pages: 1-2 weeks
+- 10-20 pages: 2-3 weeks
+- 20+ pages: 3-4 weeks
+
+RATE:
+
+$25-40/hr fits my range. Prefer hourly for ongoing work, can discuss fixed-price for defined scope.
+
+The demo took ~4 hours to build (including documentation). Your actual site with Figma designs will be faster since architecture is proven.
+
+Ready to start when you are.
+
+Best regards,
+Leonid
+
+Live Demo: https://leonidsvb.github.io/upwork-demos/demo/eleventy-site/
+Source Code: https://github.com/LeonidSvb/upwork-demos/tree/master/demo/eleventy-minimal-corporate

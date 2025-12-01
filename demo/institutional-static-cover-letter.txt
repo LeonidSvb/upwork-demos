@@ -1,0 +1,33 @@
+Hi,
+
+I've built a precision demo following your strict specifications: https://leonidsvb.github.io/upwork-demos/demo/institutional-static-site/index.html
+
+This demonstrates exactly what you need:
+✓ Semantic HTML5 structure
+✓ Vanilla CSS (no frameworks)
+✓ Minimal JavaScript
+✓ WCAG 2.1 AA accessibility compliance
+✓ JSON-LD schema markup (Organization + Breadcrumb)
+✓ Monochrome, text-focused design
+✓ Keyboard navigation with focus indicators
+✓ No external dependencies
+
+Answers to your screening questions:
+
+1. Yes, I can execute exactly as specified with zero deviation or added elements.
+
+2. Demo example: The site above uses only HTML5, CSS, and minimal vanilla JS - no frameworks.
+
+3. WCAG 2.1 AA implementation:
+   - Keyboard nav: Full Tab support, visible focus indicators, skip-to-content link
+   - Headings: Proper h1-h4 hierarchy without skipping levels
+   - Contrast: Black on white (21:1 ratio, exceeds 4.5:1 minimum)
+   - ARIA: Landmarks (banner, navigation, main, contentinfo), aria-current, aria-labels
+
+4. JSON-LD validation: Google Rich Results Test + Schema.org Validator before deployment.
+
+Timeline: 5-7 days as specified
+
+I thrive in specification-driven environments where precision matters more than creativity.
+
+Best regards

@@ -1,30 +1,28 @@
 Hi,
 
-I've built a fully functional real estate website demo for you: https://leonidsvb.github.io/upwork-demos/demo/real-estate-website-demo.html
+I built a working demo of your real estate website so you can see the exact functionality before we start:  
+https://leonidsvb.github.io/upwork-demos/demo/real-estate-website-demo.html
 
-This demonstrates exactly what you need:
-✓ Property listings with filter system (type, price, acreage, status)
-✓ Advanced search functionality
-✓ Contact form with inquiry system
-✓ Mobile-responsive design
-✓ SEO-optimized structure
-✓ Fast-loading, clean code
+Included features:
+✓ Property listings with filters (type, price, acreage, status)  
+✓ Advanced search  
+✓ Contact/inquiry forms  
+✓ Mobile-responsive, fast, SEO-ready structure  
 
-What's included in your $400 package:
-- Complete website setup from template
-- Custom property listing system
-- Search & filter functionality
-- Contact forms with validation
-- Mobile optimization
-- Basic SEO setup
-- 2 rounds of revisions
+Your $400 package includes:
+- Full website setup  
+- Custom listing system  
+- Search + filter logic  
+- Contact forms  
+- Mobile optimization  
+- Basic SEO  
+- Two revision rounds  
 
-I can customize this to match your brand and add any specific features you need (MLS integration, virtual tours, mortgage calculator, etc.).
+If needed, I can also add MLS integration, virtual tours, mortgage calculator, or any custom functionality.
 
-Experience: 6+ years building real estate websites
-Tech stack: WordPress, HTML/CSS, or custom template integration
-Timeline: 7-10 days for complete delivery
+Experience: 6+ years building real estate websites  
+Delivery: 7–10 days  
+Ready to start.
 
-Ready to start immediately.
-
-Best regards
+Best regards,
+Leonid

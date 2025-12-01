@@ -1,0 +1,35 @@
+Hi,
+
+I've built an interactive EADI demo converting QT widget to JavaScript Canvas: https://leonidsvb.github.io/upwork-demos/demo/eadi-demo.html
+
+This demonstrates exactly what you need:
+✓ Pure JavaScript Canvas implementation
+✓ Accurate coordinate system transformations (QT to Canvas)
+✓ Real-time pitch and roll visualization
+✓ Artificial horizon with sky/ground separation
+✓ Pitch ladder with degree markings (-30° to +30°)
+✓ Roll indicator with bank angle marks
+✓ Altitude and airspeed displays
+✓ Interactive controls to test all indicators
+
+Technical expertise shown:
+- Canvas 2D API with advanced transformations
+- Coordinate system conversion (QT coordinate space → Canvas)
+- Trigonometric calculations for roll/pitch
+- Gradient rendering for realistic sky/ground
+- Clipping regions for circular instrument display
+
+I've studied the QFlightinstruments repo (qfi_EADI.cpp/h) and understand:
+- C++ QT widget structure
+- SVG asset integration
+- Paint coordinate transformations
+- How to replicate behavior in Canvas
+
+Timeline: Can deliver full EADI conversion within 5-7 days
+Budget: $150 fixed price as specified
+
+Experience: 6+ years JavaScript Canvas, multiple instrument conversions, C++ background
+
+Ready to convert the complete EADI with all indicators exactly as in the original QT widget.
+
+Best regards
